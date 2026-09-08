@@ -1,0 +1,46 @@
+{
+  "season": 2025,
+  "locked_at": "2025-09-04T00:00:00Z",
+  "players": {
+    "alfredo": {
+      "display_name": "Alfredo",
+      "divisions": {
+        "AFC East": "BUF", "AFC North": "BAL",
+        "AFC South": "HOU", "AFC West": "KC",
+        "NFC East": "PHI", "NFC North": "DET",
+        "NFC South": "TB",  "NFC West": "SF"
+      },
+      "playoffs": {
+        "AFC": ["KC", "BAL", "HOU", "BUF", "LAC", "PIT", "DEN"],
+        "NFC": ["PHI", "DET", "TB", "SF", "GB", "LAR", "MIN"],
+        "afc_champion": "KC",
+        "nfc_champion": "PHI",
+        "sb_winner": "KC"
+      },
+      "awards": {
+        "MVP": "Josh Allen", "OPOY": "Saquon Barkley", "DPOY": "Myles Garrett",
+        "OROY": "", "DROY": "", "CPOY": "", "COY": ""
+      }
+    },
+    "oraculo": {
+      "display_name": "Oráculo",
+      "divisions": {
+        "AFC East": "NE",  "AFC North": "PIT",
+        "AFC South": "JAX", "AFC West": "DEN",
+        "NFC East": "PHI", "NFC North": "CHI",
+        "NFC South": "CAR", "NFC West": "SEA"
+      },
+      "playoffs": {
+        "AFC": ["DEN", "NE", "JAX", "PIT", "HOU", "BUF", "LAC"],
+        "NFC": ["SEA", "CHI", "PHI", "CAR", "LAR", "SF", "GB"],
+        "afc_champion": "NE",
+        "nfc_champion": "SEA",
+        "sb_winner": "SEA"
+      },
+      "awards": {
+        "MVP": "drake maye", "OPOY": "Jonathan Taylor", "DPOY": "Myles Garrett",
+        "OROY": "", "DROY": "", "CPOY": "", "COY": "Mike Vrabel"
+      }
+    }
+  }
+}

@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NFL Pool 2026 · Picks</title>
+<style>
+  :root {
+    --bg: #f9f9f7; --surface: #ffffff; --ink: #0b0b0b; --ink2: #52514e; --muted: #898781;
+    --line: #e1e0d9; --accent: #2a78d6; --warn: #b45309; --warn-bg: #fff7ed; --ok: #006300;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  main { max-width: 1080px; margin: 0 auto; padding: 24px 16px 96px; }
+  h1 { font-size: 28px; margin: 0 0 4px; }
+  h2 { font-size: 20px; margin: 28px 0 10px; }
+  h3 { font-size: 15px; margin: 18px 0 8px; color: var(--ink2); text-transform: uppercase; letter-spacing: .04em; }
+  p.hint { color: var(--muted); margin: 0 0 16px; font-size: 14px; }
+  .top { display: flex; gap: 16px; flex-wrap: wrap; align-items: end; }
+  .top label { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--ink2); }
+  input[type=text], input[type=number], select {
+    font: inherit; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--ink); min-width: 0;
+  }
+  select:invalid { color: var(--muted); }
+  .tabs { display: flex; gap: 8px; margin: 24px 0 0; border-bottom: 2px solid var(--line); }
+  .tabs button { font: inherit; font-weight: 600; padding: 10px 18px; border: 0; background: none; color: var(--ink2); border-bottom: 3px solid transparent; margin-bottom: -2px; cursor: pointer; }
+  .tabs button.active { color: var(--accent); border-color: var(--accent); }
+  .player { display: none; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 20px; }
+  .player.active { display: block; }
+  .grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px 28px; }
+  .row { display: grid; grid-template-columns: 110px 1fr; align-items: center; gap: 10px; margin: 4px 0; }
+  .row .lbl { font-size: 14px; color: var(--ink2); }
+  .seed { grid-template-columns: 64px 1fr; }
+  .seed .lbl { font-variant-numeric: tabular-nums; }
+  .awards .row { grid-template-columns: 64px 1fr; }
+  .awards .lbl small { color: var(--muted); font-weight: normal; }
+  .actions { position: sticky; bottom: 0; background: var(--bg); padding: 12px 0; display: flex; gap: 10px; flex-wrap: wrap; border-top: 1px solid var(--line); margin-top: 24px; }
+  button.primary, button.ghost { font: inherit; font-weight: 600; padding: 10px 16px; border-radius: 8px; cursor: pointer; border: 1px solid var(--accent); }
+  button.primary { background: var(--accent); color: #fff; }
+  button.ghost { background: var(--surface); color: var(--accent); }
+  button:disabled { opacity: .5; cursor: default; }
+  button.small { font: inherit; font-size: 13px; padding: 4px 10px; border-radius: 6px; border: 1px solid var(--line); background: var(--surface); color: var(--ink2); cursor: pointer; margin: 6px 0 0; }
+  .warnings { background: var(--warn-bg); border: 1px solid #fed7aa; color: var(--warn); border-radius: 8px; padding: 10px 14px; margin: 16px 0; font-size: 14px; }
+  .warnings ul { margin: 6px 0 0; padding-left: 20px; }
+  .ok { color: var(--ok); font-size: 14px; margin: 16px 0; }
+  textarea { width: 100%; min-height: 260px; font: 13px/1.4 ui-monospace, Menlo, Consolas, monospace; border: 1px solid var(--line); border-radius: 8px; padding: 10px; background: var(--surface); color: var(--ink); }
+  .status { color: var(--muted); font-size: 13px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>NFL Pool 2026 · Picks</h1>
+  <p class="hint">Se usa una vez. Llená los dos jugadores, generá el JSON y commitealo como <code>docs/data/picks.json</code>. El borrador se guarda solo en este navegador.</p>
+
+  <div class="top">
+    <label>Temporada <input type="number" id="season" value="2026" min="2020" max="2100" style="width:100px"></label>
+    <label>Jugador 1 <input type="text" id="name0" placeholder="Nombre" value="Alfredo"></label>
+    <label>Jugador 2 <input type="text" id="name1" placeholder="Nombre" value=""></label>
+    <span class="status" id="status"></span>
+  </div>
+
+  <div class="tabs">
+    <button type="button" class="active" data-tab="0">Alfredo</button>
+    <button type="button" data-tab="1">Jugador 2</button>
+  </div>
+
+  <section class="player active" data-player="0"></section>
+  <section class="player" data-player="1"></section>
+
+  <div id="warnings"></div>
+
+  <div class="actions">
+    <button type="button" class="primary" id="gen">Generar JSON</button>
+    <button type="button" class="ghost" id="copy" disabled>Copiar</button>
+    <button type="button" class="ghost" id="download" disabled>Descargar picks.json</button>
+    <button type="button" class="ghost" id="reset" style="margin-left:auto;border-color:var(--line);color:var(--ink2)">Borrar borrador</button>
+  </div>
+  <textarea id="out" readonly placeholder="Acá aparece el JSON"></textarea>
+</main>
+
+<script>
+// Abreviaciones ESPN (ver tests/fixtures/README.md): WSH, LAR, LAC, LV, JAX.
+const TEAMS = {
+  "AFC East":  [["BUF","Buffalo Bills"],["MIA","Miami Dolphins"],["NE","New England Patriots"],["NYJ","New York Jets"]],
+  "AFC North": [["BAL","Baltimore Ravens"],["CIN","Cincinnati Bengals"],["CLE","Cleveland Browns"],["PIT","Pittsburgh Steelers"]],
+  "AFC South": [["HOU","Houston Texans"],["IND","Indianapolis Colts"],["JAX","Jacksonville Jaguars"],["TEN","Tennessee Titans"]],
+  "AFC West":  [["DEN","Denver Broncos"],["KC","Kansas City Chiefs"],["LV","Las Vegas Raiders"],["LAC","Los Angeles Chargers"]],
+  "NFC East":  [["DAL","Dallas Cowboys"],["NYG","New York Giants"],["PHI","Philadelphia Eagles"],["WSH","Washington Commanders"]],
+  "NFC North": [["CHI","Chicago Bears"],["DET","Detroit Lions"],["GB","Green Bay Packers"],["MIN","Minnesota Vikings"]],
+  "NFC South": [["ATL","Atlanta Falcons"],["CAR","Carolina Panthers"],["NO","New Orleans Saints"],["TB","Tampa Bay Buccaneers"]],
+  "NFC West":  [["ARI","Arizona Cardinals"],["LAR","Los Angeles Rams"],["SF","San Francisco 49ers"],["SEA","Seattle Seahawks"]],
+};
+const CONFS = ["AFC", "NFC"];
+const DIVS = Object.keys(TEAMS);
+const AWARDS = [["MVP","3 pts"],["OPOY","2"],["DPOY","2"],["OROY","2"],["DROY","2"],["CPOY","2"],["COY","2"]];
+const STORAGE_KEY = "nfl-pool-picks-draft";
+
+const confTeams = c => DIVS.filter(d => d.startsWith(c)).flatMap(d => TEAMS[d]);
+const opts = (teams, placeholder) =>
+  `<option value="" disabled selected>${placeholder}</option>` +
+  teams.map(([a, n]) => `<option value="${a}">${a} · ${n}</option>`).join("");
+
+function renderPlayer(i) {
+  const el = document.querySelector(`.player[data-player="${i}"]`);
+  const divsHtml = CONFS.map(c => `
+    <div>
+      <h3>${c}</h3>
+      ${DIVS.filter(d => d.startsWith(c)).map(d => `
+        <div class="row"><span class="lbl">${d}</span>
+          <select name="div:${d}" required>${opts(TEAMS[d], "Campeón de división")}</select></div>`).join("")}
+    </div>`).join("");
+  const poHtml = CONFS.map(c => `
+    <div>
+      <h3>${c} · seeds 1 a 7</h3>
+      ${[1,2,3,4,5,6,7].map(s => `
+        <div class="row seed"><span class="lbl">#${s}</span>
+          <select name="po:${c}:${s}" required>${opts(confTeams(c), s <= 4 ? "Campeón de división" : "Wild card")}</select></div>`).join("")}
+      <button type="button" class="small" data-fill="${c}">Copiar campeones de división a seeds 1–4</button>
+      <div class="row" style="margin-top:14px"><span class="lbl">Campeón ${c}</span>
+        <select name="champ:${c}" required>${opts(confTeams(c), "Campeón de conferencia")}</select></div>
+    </div>`).join("");
+  el.innerHTML = `
+    <h2>Divisiones <span class="status">3 pts c/u</span></h2>
+    <div class="grid2">${divsHtml}</div>
+    <h2>Playoffs <span class="status">2 pts por clasificado · 4 por campeón de conferencia</span></h2>
+    <p class="hint">El orden del seed no da puntos, pero dejalo consistente: seeds 1–4 son los campeones de división.</p>
+    <div class="grid2">${poHtml}</div>
+    <div class="row" style="max-width:420px;margin-top:10px"><span class="lbl">Super Bowl <small class="status">5 pts</small></span>
+      <select name="sb" required>${opts([...confTeams("AFC"), ...confTeams("NFC")], "Ganador del Super Bowl")}</select></div>
+    <h2>Premios <span class="status">se llenan cuando quieras</span></h2>
+    <div class="grid2 awards">
+      ${AWARDS.map(([a, p]) => `<div class="row"><span class="lbl">${a} <small>${p}</small></span>
+        <input type="text" name="aw:${a}" placeholder="Nombre del jugador / coach" autocomplete="off"></div>`).join("")}
+    </div>`;
+  el.querySelectorAll("[data-fill]").forEach(b => b.addEventListener("click", () => {
+    const c = b.dataset.fill;
+    DIVS.filter(d => d.startsWith(c)).forEach((d, k) => {
+      const v = el.querySelector(`[name="div:${d}"]`).value;
+      if (v) el.querySelector(`[name="po:${c}:${k + 1}"]`).value = v;
+    });
+    saveDraft();
+  }));
+}
+
+function slug(s) {
+  return s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "");
+}
+
+function readPlayer(i) {
+  const el = document.querySelector(`.player[data-player="${i}"]`);
+  const v = name => (el.querySelector(`[name="${name}"]`) || {}).value || "";
+  const divisions = Object.fromEntries(DIVS.map(d => [d, v(`div:${d}`)]));
+  const playoffs = {};
+  CONFS.forEach(c => { playoffs[c] = [1,2,3,4,5,6,7].map(s => v(`po:${c}:${s}`)); });
+  playoffs.afc_champion = v("champ:AFC");
+  playoffs.nfc_champion = v("champ:NFC");
+  playoffs.sb_winner = v("sb");
+  const awards = Object.fromEntries(AWARDS.map(([a]) => [a, v(`aw:${a}`).trim()]));
+  return { display_name: document.getElementById(`name${i}`).value.trim(), divisions, playoffs, awards };
+}
+
+function validate(p, label) {
+  const w = [];
+  const missingDiv = DIVS.filter(d => !p.divisions[d]);
+  if (missingDiv.length) w.push(`${label}: faltan divisiones (${missingDiv.join(", ")})`);
+  CONFS.forEach(c => {
+    const picks = p.playoffs[c];
+    const empty = picks.filter(x => !x).length;
+    if (empty) w.push(`${label}: faltan ${empty} seeds en ${c}`);
+    const dup = picks.filter((x, k) => x && picks.indexOf(x) !== k);
+    if (dup.length) w.push(`${label}: equipo repetido en playoffs ${c} (${[...new Set(dup)].join(", ")})`);
+    const divWinners = DIVS.filter(d => d.startsWith(c)).map(d => p.divisions[d]).filter(Boolean);
+    const notIn = divWinners.filter(t => !picks.includes(t));
+    if (notIn.length) w.push(`${label}: ${notIn.join(", ")} es campeón de división pero no está en los playoffs ${c}`);
+    const wrongSeed = divWinners.filter(t => picks.indexOf(t) >= 4);
+    if (wrongSeed.length) w.push(`${label}: ${wrongSeed.join(", ")} es campeón de división pero está en seed 5–7 de ${c}`);
+    const champ = p.playoffs[`${c.toLowerCase()}_champion`];
+    if (!champ) w.push(`${label}: falta campeón ${c}`);
+    else if (!picks.includes(champ)) w.push(`${label}: el campeón ${c} (${champ}) no está en sus playoffs`);
+  });
+  const sb = p.playoffs.sb_winner;
+  if (!sb) w.push(`${label}: falta ganador del Super Bowl`);
+  else if (sb !== p.playoffs.afc_champion && sb !== p.playoffs.nfc_champion)
+    w.push(`${label}: el ganador del Super Bowl (${sb}) no es ninguno de los dos campeones de conferencia`);
+  const emptyAwards = AWARDS.map(([a]) => a).filter(a => !p.awards[a]);
+  if (emptyAwards.length) w.push(`${label}: premios sin llenar (${emptyAwards.join(", ")}) — valen 0 hasta que los completes`);
+  return w;
+}
+
+function build() {
+  const players = {};
+  const warnings = [];
+  const names = [0, 1].map(i => document.getElementById(`name${i}`).value.trim());
+  names.forEach((n, i) => { if (!n) warnings.push(`Falta el nombre del jugador ${i + 1}`); });
+  if (names[0] && names[1] && slug(names[0]) === slug(names[1])) warnings.push("Los dos jugadores tienen el mismo nombre");
+  [0, 1].forEach(i => {
+    const p = readPlayer(i);
+    const id = slug(p.display_name) || `jugador${i + 1}`;
+    warnings.push(...validate(p, p.display_name || `Jugador ${i + 1}`));
+    players[id] = p;
+  });
+  const season = Number(document.getElementById("season").value) || new Date().getFullYear();
+  const json = { season, locked_at: new Date().toISOString().replace(/\.\d{3}Z$/, "Z"), players };
+  return { json, warnings };
+}
+
+function showWarnings(list) {
+  const box = document.getElementById("warnings");
+  box.innerHTML = list.length
+    ? `<div class="warnings"><strong>Revisá antes de commitear:</strong><ul>${list.map(w => `<li>${w}</li>`).join("")}</ul></div>`
+    : `<div class="ok">✓ Sin observaciones. Listo para commitear.</div>`;
+}
+
+// ---- borrador en localStorage
+function formState() {
+  const s = { season: document.getElementById("season").value, names: [0, 1].map(i => document.getElementById(`name${i}`).value), fields: {} };
+  document.querySelectorAll(".player select, .player input").forEach(f => { s.fields[`${f.closest(".player").dataset.player}|${f.name}`] = f.value; });
+  return s;
+}
+function saveDraft() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(formState())); setStatus("borrador guardado"); } catch (e) {}
+}
+function loadDraft() {
+  let s; try { s = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null"); } catch (e) {}
+  if (!s) return;
+  if (s.season) document.getElementById("season").value = s.season;
+  (s.names || []).forEach((n, i) => { document.getElementById(`name${i}`).value = n; syncTab(i); });
+  Object.entries(s.fields || {}).forEach(([k, v]) => {
+    const [pi, name] = k.split("|");
+    const f = document.querySelector(`.player[data-player="${pi}"] [name="${name}"]`);
+    if (f) f.value = v;
+  });
+  setStatus("borrador restaurado");
+}
+let statusTimer;
+function setStatus(t) { const el = document.getElementById("status"); el.textContent = t; clearTimeout(statusTimer); statusTimer = setTimeout(() => el.textContent = "", 2000); }
+function syncTab(i) {
+  document.querySelector(`.tabs button[data-tab="${i}"]`).textContent = document.getElementById(`name${i}`).value.trim() || `Jugador ${i + 1}`;
+}
+
+// ---- init
+[0, 1].forEach(renderPlayer);
+loadDraft();
+document.addEventListener("change", saveDraft);
+document.addEventListener("input", e => { if (e.target.matches("input")) saveDraft(); });
+
+document.querySelectorAll(".tabs button").forEach(b => b.addEventListener("click", () => {
+  document.querySelectorAll(".tabs button").forEach(x => x.classList.toggle("active", x === b));
+  document.querySelectorAll(".player").forEach(p => p.classList.toggle("active", p.dataset.player === b.dataset.tab));
+}));
+[0, 1].forEach(i => document.getElementById(`name${i}`).addEventListener("input", () => syncTab(i)));
+
+let lastJson = "";
+document.getElementById("gen").addEventListener("click", () => {
+  const { json, warnings } = build();
+  lastJson = JSON.stringify(json, null, 2);
+  document.getElementById("out").value = lastJson;
+  showWarnings(warnings);
+  document.getElementById("copy").disabled = false;
+  document.getElementById("download").disabled = false;
+});
+document.getElementById("copy").addEventListener("click", async () => {
+  try { await navigator.clipboard.writeText(lastJson); setStatus("copiado"); }
+  catch (e) { document.getElementById("out").select(); document.execCommand("copy"); setStatus("copiado"); }
+});
+document.getElementById("download").addEventListener("click", () => {
+  const blob = new Blob([lastJson + "\n"], { type: "application/json" });
+  const a = Object.assign(document.createElement("a"), { href: URL.createObjectURL(blob), download: "picks.json" });
+  document.body.appendChild(a); a.click(); a.remove();
+});
+document.getElementById("reset").addEventListener("click", () => {
+  if (!confirm("¿Borrar el borrador guardado en este navegador?")) return;
+  try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
+  location.reload();
+});
+</script>
+</body>
+</html>

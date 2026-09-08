@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NFL Pool 2026</title>
+<style>
+  :root {
+    --page: #0d0d0d; --surface: #1a1a19; --ink: #ffffff; --ink2: #c3c2b7; --muted: #898781;
+    --grid: #2c2c2a; --axis: #383835;
+    --p1: #3987e5; --p2: #d95926;
+    --up: #0ca30c; --down: #e66767;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0; background: var(--page); color: var(--ink);
+    font: 16px/1.3 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-variant-numeric: tabular-nums;
+  }
+  #app {
+    height: 100vh; padding: 1.4vh 1.6vw; display: grid; gap: 1.4vh;
+    grid-template-rows: auto auto 1fr auto;
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas: "hdr hdr" "cards cards" "divs playoffs" "chart chart";
+  }
+  header { grid-area: hdr; display: flex; align-items: baseline; gap: 1.2em; }
+  header h1 { margin: 0; font-size: 3vh; font-weight: 700; letter-spacing: .01em; }
+  header .meta { color: var(--muted); font-size: 1.8vh; margin-left: auto; }
+
+  .cards { grid-area: cards; display: grid; grid-template-columns: 1fr 1fr; gap: 1.4vh; }
+  .card { background: var(--surface); border-radius: 1.2vh; padding: 1.4vh 2vw; display: grid; grid-template-columns: auto 1fr; gap: .4vh 2vw; align-items: center; border-left: .6vw solid var(--c); }
+  .card .name { font-size: 3.2vh; font-weight: 700; grid-column: 1; }
+  .card .total { font-size: 8vh; font-weight: 800; line-height: 1; grid-row: 1 / span 2; grid-column: 2; justify-self: end; display: flex; align-items: baseline; gap: .6vw; }
+  .card .total small { font-size: 2.4vh; color: var(--muted); font-weight: 500; }
+  .card .delta { font-size: 2.6vh; font-weight: 700; grid-column: 1; }
+  .card .delta.up { color: var(--up); } .card .delta.down { color: var(--down); } .card .delta.flat { color: var(--muted); }
+  .card .bd { grid-column: 1 / -1; display: flex; gap: 1.6vw; color: var(--ink2); font-size: 1.9vh; flex-wrap: wrap; }
+  .card .bd b { color: var(--ink); }
+
+  .panel { background: var(--surface); border-radius: 1.2vh; padding: 1.2vh 1.4vw; min-height: 0; overflow: hidden; display: flex; flex-direction: column; }
+  .panel h2 { margin: 0 0 .8vh; font-size: 2vh; color: var(--ink2); text-transform: uppercase; letter-spacing: .06em; font-weight: 600; }
+  #divs { grid-area: divs; } #playoffs { grid-area: playoffs; }
+  table { border-collapse: collapse; width: 100%; font-size: 2.2vh; flex: 1; }
+  th { color: var(--muted); font-weight: 600; text-align: left; font-size: 1.7vh; text-transform: uppercase; letter-spacing: .05em; padding: 0 .6vw .4vh; }
+  td { padding: .35vh .6vw; border-top: 1px solid var(--grid); white-space: nowrap; }
+  td.lead { font-weight: 700; }
+  .pick { display: inline-flex; align-items: center; gap: .5vw; }
+  .pick .m { display: inline-block; width: 1.9vh; text-align: center; font-weight: 800; }
+  .hit .m { color: var(--up); } .miss .m { color: var(--down); } .miss { color: var(--muted); }
+  .na { color: var(--muted); }
+  th.p1, th.p2 { border-bottom: .35vh solid var(--c); }
+  .po { display: grid; grid-template-columns: 1fr 1fr; gap: 1.4vw; flex: 1; }
+  .po table td:first-child { color: var(--muted); width: 3vw; }
+
+  #chart { grid-area: chart; height: 24vh; }
+  #chart .wrap { flex: 1; position: relative; min-height: 0; }
+  #chart svg { width: 100%; height: 100%; display: block; overflow: visible; }
+  .legend { display: flex; gap: 2vw; font-size: 1.8vh; color: var(--ink2); margin-left: auto; }
+  .legend i { display: inline-block; width: 1.6vh; height: .4vh; border-radius: 2px; vertical-align: middle; margin-right: .4vw; background: var(--c); }
+  .tip { position: absolute; pointer-events: none; background: #0d0d0d; border: 1px solid var(--axis); border-radius: .8vh; padding: .6vh 1vw; font-size: 1.8vh; color: var(--ink2); white-space: nowrap; display: none; }
+  .tip b { color: var(--ink); }
+  .empty { color: var(--muted); font-size: 2.4vh; text-align: center; margin: auto; }
+  #err { grid-column: 1 / -1; color: var(--down); font-size: 2vh; }
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <h1>NFL Pool <span id="season"></span></h1>
+    <span class="meta" id="meta">cargando…</span>
+  </header>
+  <div class="cards" id="cards"></div>
+  <section class="panel" id="divs"><h2>Divisiones · 3 pts</h2><div class="empty">—</div></section>
+  <section class="panel" id="playoffs"><h2>Playoffs · 2 pts por clasificado</h2><div class="empty">—</div></section>
+  <section class="panel" id="chart"><h2 style="display:flex;align-items:center">Evolución <span class="legend" id="legend"></span></h2><div class="wrap"><svg id="svg"></svg><div class="tip" id="tip"></div></div></section>
+</div>
+
+<script>
+const COLORS = ["var(--p1)", "var(--p2)"];
+const CATS = [["divisions","Div"],["playoffs","Playoffs"],["conf_champions","Conf"],["sb_winner","SB"],["awards","Premios"]];
+const bust = url => `${url}?v=${Date.now()}`;   // Pages cachea: cache-busting obligatorio
+
+async function loadJson(path, fallback) {
+  try {
+    const r = await fetch(bust(path), { cache: "no-store" });
+    if (!r.ok) return fallback;
+    return await r.json();
+  } catch (e) { return fallback; }
+}
+
+const fmtDate = iso => iso ? new Date(iso).toLocaleDateString("es-CL", { day: "numeric", month: "short" }) : "";
+const day = iso => (iso || "").slice(0, 10);
+
+// Un snapshot por día (UTC); si el workflow corrió dos veces el mismo día, vale el último.
+function byDay(history) {
+  const m = new Map();
+  for (const h of history) m.set(day(h.computed_at), h);
+  return [...m.values()];
+}
+
+function main(scores, history) {
+  const app = document.getElementById("app");
+  if (!scores) {
+    document.getElementById("meta").textContent = "sin datos todavía";
+    app.insertAdjacentHTML("beforeend", `<div id="err">Falta <code>data/scores.json</code>. Corré el workflow (workflow_dispatch) o <code>python scripts/fetch_standings.py && python scripts/score.py</code>.</div>`);
+    return;
+  }
+  const ids = Object.keys(scores.players);
+  const players = ids.map((id, i) => ({ id, i, color: COLORS[i], ...scores.players[id] }));
+  const snaps = byDay(history || []);
+  const today = day(scores.computed_at);
+  const prev = [...snaps].reverse().find(h => day(h.computed_at) < today) || null;
+
+  document.getElementById("season").textContent = scores.season || "";
+  document.getElementById("meta").textContent =
+    `actualizado ${fmtDate(scores.computed_at)}` + (prev ? ` · Δ vs ${fmtDate(prev.computed_at)}` : "");
+
+  // ---- cards
+  document.getElementById("cards").innerHTML = players.map(p => {
+    const d = prev && prev.totals && prev.totals[p.id] != null ? p.total - prev.totals[p.id] : null;
+    const cls = d == null ? "flat" : d > 0 ? "up" : d < 0 ? "down" : "flat";
+    const txt = d == null ? "—" : d > 0 ? `▲ +${d}` : d < 0 ? `▼ ${d}` : "= 0";
+    return `<div class="card" style="--c:${p.color}">
+      <div class="name">${p.display_name}</div>
+      <div class="total">${p.total}<small>/ ${scores.max_points}</small></div>
+      <div class="delta ${cls}">${txt} <span style="font-weight:500;color:var(--muted);font-size:.7em">esta semana</span></div>
+      <div class="bd">${CATS.map(([k, l]) => `<span>${l} <b>${p.breakdown[k]}</b></span>`).join("")}</div>
+    </div>`;
+  }).join("");
+
+  const pickCell = (det) => {
+    if (!det || !det.pick) return `<td class="na">—</td>`;
+    const cls = det.actual == null ? "na" : det.hit ? "hit" : "miss";
+    const m = det.actual == null ? "·" : det.hit ? "✓" : "✗";
+    return `<td><span class="pick ${cls}"><span class="m">${m}</span>${det.pick}</span></td>`;
+  };
+  const heads = players.map(p => `<th class="p${p.i + 1}" style="--c:${p.color}">${p.display_name}</th>`).join("");
+
+  // ---- divisiones
+  const divs = Object.keys(scores.current.division_leaders);
+  document.getElementById("divs").innerHTML = `<h2>Divisiones · 3 pts</h2>
+    <table><thead><tr><th>División</th><th>Líder</th>${heads}</tr></thead><tbody>
+    ${divs.map(d => `<tr><td>${d}</td><td class="${scores.current.division_leaders[d] ? "lead" : "na"}">${scores.current.division_leaders[d] || "—"}</td>
+      ${players.map(p => pickCell(p.details.divisions[d])).join("")}</tr>`).join("")}
+    </tbody></table>`;
+
+  // ---- playoffs
+  const poTable = conf => {
+    const actual = scores.current.playoff_teams[conf] || [];
+    const rows = Array.from({ length: 7 }, (_, k) => {
+      const team = actual[k];
+      return `<tr><td>${k + 1}</td><td class="${team ? "lead" : "na"}">${team || "—"}</td>
+        ${players.map(p => {
+          const det = p.details.playoffs[conf];
+          const pick = det.pick[k];
+          if (!pick) return `<td class="na">—</td>`;
+          const known = actual.length > 0;
+          const hit = det.hits.includes(pick);
+          return `<td><span class="pick ${!known ? "na" : hit ? "hit" : "miss"}"><span class="m">${!known ? "·" : hit ? "✓" : "✗"}</span>${pick}</span></td>`;
+        }).join("")}</tr>`;
+    }).join("");
+    return `<table><thead><tr><th>#</th><th>${conf}</th>${heads}</tr></thead><tbody>${rows}</tbody></table>`;
+  };
+  document.getElementById("playoffs").innerHTML = `<h2>Playoffs · 2 pts por clasificado <span style="color:var(--muted);text-transform:none;letter-spacing:0;font-weight:500">· el seed del pick no importa, solo estar adentro</span></h2>
+    <div class="po">${poTable("AFC")}${poTable("NFC")}</div>`;
+
+  // ---- gráfico
+  document.getElementById("legend").innerHTML = players.map(p => `<span style="--c:${p.color}"><i></i>${p.display_name}</span>`).join("");
+  drawChart(players, snaps, scores.max_points);
+}
+
+function drawChart(players, snaps, max) {
+  const svg = document.getElementById("svg");
+  const wrap = svg.parentElement;
+  const W = wrap.clientWidth, H = wrap.clientHeight;
+  const m = { l: 34, r: 90, t: 10, b: 22 };
+  const iw = W - m.l - m.r, ih = H - m.t - m.b;
+  if (!snaps.length || iw <= 0 || ih <= 0) { svg.innerHTML = `<text x="${W/2}" y="${H/2}" fill="#898781" text-anchor="middle" font-size="16">todavía no hay historial</text>`; return; }
+
+  const n = snaps.length;
+  const ymax = Math.max(10, ...snaps.flatMap(h => Object.values(h.totals)));
+  const yTop = Math.min(max, Math.ceil(ymax / 10) * 10 + 5);
+  const x = i => m.l + (n === 1 ? iw / 2 : (i / (n - 1)) * iw);
+  const y = v => m.t + ih - (v / yTop) * ih;
+  const NS = "http://www.w3.org/2000/svg";
+  const el = (t, a, txt) => { const e = document.createElementNS(NS, t); for (const k in a) e.setAttribute(k, a[k]); if (txt != null) e.textContent = txt; return e; };
+  svg.innerHTML = "";
+
+  // grilla y ejes (recesivos)
+  const ticks = [0, Math.round(yTop / 2), yTop];
+  for (const v of ticks) {
+    svg.appendChild(el("line", { x1: m.l, x2: m.l + iw, y1: y(v), y2: y(v), stroke: "#2c2c2a", "stroke-width": 1 }));
+    svg.appendChild(el("text", { x: m.l - 8, y: y(v) + 4, fill: "#898781", "font-size": 12, "text-anchor": "end" }, v));
+  }
+  svg.appendChild(el("line", { x1: m.l, x2: m.l + iw, y1: y(0), y2: y(0), stroke: "#383835", "stroke-width": 1 }));
+  const step = Math.max(1, Math.ceil(n / 9));
+  snaps.forEach((h, i) => {
+    if (i % step === 0 || i === n - 1)
+      svg.appendChild(el("text", { x: x(i), y: H - 4, fill: "#898781", "font-size": 12, "text-anchor": "middle" }, fmtDate(h.computed_at)));
+  });
+
+  // series: línea 2px, marcador ≥8px con anillo de superficie, etiqueta directa al final
+  const raw = { "var(--p1)": "#3987e5", "var(--p2)": "#d95926" };
+  players.forEach(p => {
+    const col = raw[p.color] || p.color;
+    const pts = snaps.map((h, i) => [x(i), y(h.totals[p.id] ?? 0)]);
+    svg.appendChild(el("path", { d: pts.map((q, i) => (i ? "L" : "M") + q[0] + " " + q[1]).join(" "), fill: "none", stroke: col, "stroke-width": 2, "stroke-linejoin": "round" }));
+    pts.forEach(q => svg.appendChild(el("circle", { cx: q[0], cy: q[1], r: 4.5, fill: col, stroke: "#1a1a19", "stroke-width": 2 })));
+    const last = pts[pts.length - 1];
+    svg.appendChild(el("text", { x: last[0] + 10, y: last[1] + 4, fill: "#c3c2b7", "font-size": 13, "font-weight": 600 }, `${p.display_name} ${snaps[n - 1].totals[p.id]}`));
+  });
+
+  // hover: crosshair + tooltip
+  const cross = el("line", { y1: m.t, y2: m.t + ih, stroke: "#898781", "stroke-width": 1, "stroke-dasharray": "3 3", visibility: "hidden" });
+  svg.appendChild(cross);
+  const tip = document.getElementById("tip");
+  const hit = el("rect", { x: m.l, y: m.t, width: iw, height: ih, fill: "transparent" });
+  svg.appendChild(hit);
+  hit.addEventListener("mousemove", e => {
+    const r = svg.getBoundingClientRect();
+    const px = e.clientX - r.left;
+    const i = n === 1 ? 0 : Math.max(0, Math.min(n - 1, Math.round(((px - m.l) / iw) * (n - 1))));
+    cross.setAttribute("x1", x(i)); cross.setAttribute("x2", x(i)); cross.setAttribute("visibility", "visible");
+    tip.innerHTML = `<b>${fmtDate(snaps[i].computed_at)}</b>` + players.map(p => `<br>${p.display_name}: <b>${snaps[i].totals[p.id] ?? "—"}</b>`).join("");
+    tip.style.display = "block";
+    const left = x(i) + 14 + tip.offsetWidth > W ? x(i) - 14 - tip.offsetWidth : x(i) + 14;
+    tip.style.left = left + "px"; tip.style.top = (m.t + 4) + "px";
+  });
+  hit.addEventListener("mouseleave", () => { cross.setAttribute("visibility", "hidden"); tip.style.display = "none"; });
+}
+
+(async () => {
+  const [scores, history] = await Promise.all([loadJson("data/scores.json", null), loadJson("data/history.json", [])]);
+  main(scores, history);
+  let t; window.addEventListener("resize", () => { clearTimeout(t); t = setTimeout(() => location.reload(), 200); });
+})();
+</script>
+</body>
+</html>

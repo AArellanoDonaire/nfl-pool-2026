@@ -1,0 +1,46 @@
+name: weekly-update
+
+on:
+  schedule:
+    - cron: "0 12 * * 2"   # martes 12:00 UTC = 09:00 Chile (UTC-3 toda la temporada)
+  workflow_dispatch:        # botón manual, indispensable para probar
+
+permissions:
+  contents: write           # necesario para el commit
+
+concurrency:
+  group: weekly-update
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - run: pip install -r requirements.txt
+
+      - name: fetch standings
+        run: python scripts/fetch_standings.py
+
+      - name: score
+        run: |
+          if [ ! -f docs/data/picks.json ]; then
+            echo "::warning::docs/data/picks.json no existe todavía: se commitean los standings pero no hay puntaje."
+            exit 0
+          fi
+          python scripts/score.py
+
+      - name: commit
+        run: |
+          git config user.name "nfl-pool-bot"
+          git config user.email "actions@github.com"
+          git add docs/data/
+          git diff --staged --quiet || git commit -m "standings $(date -u +%F) (week $(date -u +%V))"
+          git push
+
+      # El aviso por Telegram (paso 6) se agrega acá cuando exista scripts/notify.py.

@@ -1,0 +1,15 @@
+{
+  "_comment": "Resultados manuales de ejemplo para tests. NO son los reales.",
+  "afc_champion": "NE",
+  "nfc_champion": "SEA",
+  "sb_winner": "SEA",
+  "awards": {
+    "MVP": "Drake Maye",
+    "OPOY": "Jonathan Taylor",
+    "DPOY": "Myles Garrett",
+    "OROY": "",
+    "DROY": "",
+    "CPOY": "",
+    "COY": ""
+  }
+}
