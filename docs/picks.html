@@ -76,11 +76,26 @@
   .ok { color: var(--ok); font-size: 14px; margin: 16px 0; }
   textarea { width: 100%; min-height: 260px; font: 13px/1.4 ui-monospace, Menlo, Consolas, monospace; border: 1px solid var(--line); border-radius: 8px; padding: 10px; background: var(--surface); color: var(--ink); }
   .status { color: var(--muted); font-size: 13px; }
+
+  /* select con logo y color del equipo elegido */
+  .chipsel { display: flex; align-items: center; gap: 8px; min-width: 0; }
+  .chipsel img { width: 30px; height: 30px; object-fit: contain; flex: none; }
+  .chipsel img[hidden] { display: none; }
+  .chipsel select { flex: 1; border-left: 6px solid var(--tc, var(--line)); }
+
+  /* tema según el ganador del Super Bowl elegido */
+  :root { --accent-ink: #ffffff; --accent2: #2a78d6; }
+  body { border-top: 10px solid var(--accent); transition: border-color .3s; }
+  button.primary { color: var(--accent-ink); }
+  h1 { display: flex; align-items: center; gap: 12px; }
+  h1 img { width: 44px; height: 44px; object-fit: contain; }
+  h1 img[hidden] { display: none; }
+  h1 small { font-size: 14px; font-weight: 500; color: var(--muted); }
 </style>
 </head>
 <body>
 <main>
-  <h1>NFL Pool 2026 · Picks</h1>
+  <h1><img id="theme-logo" alt="" hidden>NFL Pool 2026 · Picks <small id="theme-name"></small></h1>
   <p class="hint">Cada jugador puede llenar su pestaña por separado: <b>Descargar solo este jugador</b>, mandar el archivo al otro, y el otro lo carga con <b>Importar JSON</b>. Con los dos completos, <b>Generar JSON</b> y commitear como <code>docs/data/picks.json</code>. El borrador se guarda solo en este navegador y el color de cada jugador es el que usa el leaderboard.</p>
 
   <div class="top">
@@ -166,9 +181,9 @@ function renderPlayer(i) {
       <h3>${c} · seeds 1 a 7</h3>
       ${SEEDS.map(s => `
         <div class="row seed"><span class="lbl">#${s}</span>
-          <select name="po:${c}:${s}" required></select></div>`).join("")}
+          <span class="chipsel"><img alt="" hidden><select name="po:${c}:${s}" required></select></span></div>`).join("")}
       <div class="row" style="margin-top:14px"><span class="lbl">Campeón ${c}</span>
-        <select name="champ:${c}" required></select></div>
+        <span class="chipsel"><img alt="" hidden><select name="champ:${c}" required></select></span></div>
     </div>`).join("");
   el.innerHTML = `
     <h2>Divisiones <span class="status">3 pts por el campeón · 1 pt por cada lugar 2, 3 y 4 acertado</span></h2>
@@ -178,7 +193,7 @@ function renderPlayer(i) {
     <p class="hint">Los seeds 1–4 son tus campeones de división (se llenan solos). Para cambiar el orden, elige en un seed el equipo que está en otro: se intercambian. Los seeds 5–7 son los wild cards. El orden del seed no da puntos.</p>
     <div class="grid2">${poHtml}</div>
     <div class="row" style="max-width:420px;margin-top:10px"><span class="lbl">Super Bowl <small class="status">5 pts</small></span>
-      <select name="sb" required></select></div>
+      <span class="chipsel"><img alt="" hidden><select name="sb" required></select></span></div>
     <h2>Premios <span class="status">se llenan cuando quieras</span></h2>
     <div class="grid2 awards">
       ${AWARDS.map(([a, p, desc]) => `<div class="row"><span class="lbl">${a} · ${p} pts<small>${desc}</small></span>
@@ -316,6 +331,44 @@ function refreshPlayoffs(el) {
   const finalists = CONFS.map(c => q(`champ:${c}`).value).filter(Boolean);
   setOptions(q("sb"), finalists, finalists.length ? "Ganador del Super Bowl" : "Primero elige los campeones de conferencia");
   q("sb").disabled = finalists.length === 0;
+  el.querySelectorAll(".chipsel").forEach(updateChip);
+  applyTheme();
+}
+
+// Logo y color del equipo elegido junto al select.
+function updateChip(wrap) {
+  const sel = wrap.querySelector("select"), img = wrap.querySelector("img");
+  const t = T[sel.value];
+  wrap.style.setProperty("--tc", t ? t.color : "");
+  if (t) { img.src = logo(sel.value, 60); img.hidden = false; img.onerror = () => { img.onerror = null; img.src = t.logo; }; }
+  else { img.hidden = true; img.removeAttribute("src"); }
+}
+
+// La página toma el color del ganador del Super Bowl de la pestaña activa.
+const DEFAULT_ACCENT = "#2a78d6";
+function luminance(hex) {
+  const [r, g, b] = [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16) / 255).map(v => v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4);
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+function applyTheme() {
+  const el = document.querySelector(`.player[data-player="${activeTab()}"]`);
+  const abbr = el ? (el.querySelector('[name="sb"]') || {}).value : "";
+  const t = T[abbr];
+  const root = document.documentElement.style;
+  const logoEl = document.getElementById("theme-logo"), nameEl = document.getElementById("theme-name");
+  if (!t) {
+    root.removeProperty("--accent"); root.removeProperty("--accent-ink");
+    logoEl.hidden = true; logoEl.removeAttribute("src"); nameEl.textContent = "";
+    return;
+  }
+  // si el color principal es muy claro u oscuro, usar el alternativo para que el botón se lea
+  let accent = t.color;
+  const lum = luminance(accent);
+  if ((lum > 0.75 || lum < 0.02) && t.alt) accent = t.alt;
+  root.setProperty("--accent", accent);
+  root.setProperty("--accent-ink", luminance(accent) > 0.45 ? "#0b0b0b" : "#ffffff");
+  logoEl.src = logo(abbr, 88); logoEl.hidden = false; logoEl.onerror = () => { logoEl.onerror = null; logoEl.src = t.logo; };
+  nameEl.textContent = `${t.name} al Super Bowl`;
 }
 
 // ------------------------------------------------------------ leer / validar / generar
@@ -467,6 +520,7 @@ document.querySelectorAll(".player").forEach(el => el.addEventListener("input", 
 document.querySelectorAll(".tabs button").forEach(b => b.addEventListener("click", () => {
   document.querySelectorAll(".tabs button").forEach(x => x.classList.toggle("active", x === b));
   document.querySelectorAll(".player").forEach(p => p.classList.toggle("active", p.dataset.player === b.dataset.tab));
+  applyTheme();
 }));
 [0, 1].forEach(i => document.getElementById(`name${i}`).addEventListener("input", () => syncTab(i)));
 
