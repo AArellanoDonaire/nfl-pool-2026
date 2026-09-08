@@ -39,6 +39,15 @@ Todo es estático: `docs/index.html` hace `fetch()` a los JSON del mismo origen.
 
    Se compara por nombre sin importar mayúsculas ni espacios. Vacío = no puntúa.
 
+6. **Telegram** (opcional): crear un bot con @BotFather, agregarlo al chat del
+   pool y guardar en Settings → Secrets and variables → Actions:
+   - `TG_TOKEN`: token del bot
+   - `TG_CHAT`: id del chat (negativo si es grupo; se obtiene con
+     `https://api.telegram.org/bot<TOKEN>/getUpdates` después de escribirle)
+
+   Sin los secrets el workflow igual corre y solo imprime el mensaje en el log.
+   Probar local: `python scripts/notify.py` (usa `docs/data/scores.json`).
+
 ## Local
 
 ```bash
@@ -55,7 +64,7 @@ python -m http.server 8765 --directory docs       # http://localhost:8765
 
 ```
 docs/            sitio publicado (index.html, picks.html, data/)
-scripts/         espn.py (parser), fetch_standings.py, score.py (lógica pura), spike_espn.py
+scripts/         espn.py (parser), fetch_standings.py, score.py (lógica pura), notify.py, spike_espn.py
 tests/           tests + fixtures crudos de ESPN (ver tests/fixtures/README.md)
 .github/         weekly.yml (cron martes), ci.yml (tests en cada push)
 ```

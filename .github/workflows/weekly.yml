@@ -43,4 +43,8 @@ jobs:
           git diff --staged --quiet || git commit -m "standings $(date -u +%F) (week $(date -u +%V))"
           git push
 
-      # El aviso por Telegram (paso 6) se agrega acá cuando exista scripts/notify.py.
+      - name: notify (Telegram)
+        env:
+          TG_TOKEN: ${{ secrets.TG_TOKEN }}
+          TG_CHAT: ${{ secrets.TG_CHAT }}
+        run: python scripts/notify.py   # sin secrets solo imprime el mensaje
