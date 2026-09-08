@@ -42,8 +42,8 @@ def test_message_without_history(scores_2025, games_wk18):
     assert msg.startswith("\U0001F3C8 <b>NFL Pool 2025</b> · semana 18")
     # ranking: Oráculo primero con medalla, sin delta porque no hay historial
     lines = msg.splitlines()
-    assert lines[2].startswith("\U0001F947 <b>Oráculo</b>: <b>76</b>  <i>div 48")
-    assert lines[3].startswith("▪️ <b>Alfredo</b>: <b>30</b>  <i>div 12")
+    assert lines[2] == "\U0001F947 <b>Oráculo</b>: <b>76</b>  <i>div 48 (8 campeones · 24 lugares) · playoffs 28</i>"
+    assert lines[3] == "▪️ <b>Alfredo</b>: <b>30</b>  <i>div 12 (1 campeón · 9 lugares) · playoffs 18</i>"
     assert "Cambios de líder" not in msg
     assert "AFC: NE · PIT · JAX · DEN" in msg
     assert "NFC: PHI · CHI · CAR · SEA" in msg
@@ -77,6 +77,14 @@ def test_message_pending_games_and_tie(scores_2025, games_pre):
     assert "\U0001F947" not in msg
     assert "<b>Resultados</b> (0/16)" in msg
     assert "NE @ SEA — pendiente" in msg
+
+
+def test_breakdown_includes_results_when_scored(picks_2025, standings_2025, results_2025):
+    s = score_all(picks_2025, standings_2025, results_2025)
+    s["computed_at"] = "2026-10-20T12:00:00+00:00"
+    msg = build_message(s, [], None)
+    assert "<i>div 48 (8 campeones · 24 lugares) · playoffs 28 · conf 8 · SB 5 · premios 7</i>" in msg
+    assert "<i>div 12 (1 campeón · 9 lugares) · playoffs 18 · premios 2</i>" in msg
 
 
 def test_message_no_games(scores_2025):

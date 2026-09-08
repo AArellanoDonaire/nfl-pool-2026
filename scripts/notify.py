@@ -79,6 +79,21 @@ def _fmt_delta(d: int | None) -> str:
     return f" ({'+' if d > 0 else ''}{d})" if d else " (=)"
 
 
+def _breakdown(p: dict[str, Any]) -> str:
+    """'div 12 (1 campeón · 9 lugares) · playoffs 18 · conf 4 · SB 5 · premios 3'."""
+    bd = p["breakdown"]
+    divs = (p.get("details") or {}).get("divisions") or {}
+    n_champ = sum(1 for d in divs.values() if (d.get("hits") or [False])[0])
+    places = sum(sum(1 for h in (d.get("hits") or [])[1:] if h) for d in divs.values())
+    champ_txt = "1 campeón" if n_champ == 1 else f"{n_champ} campeones"
+    place_txt = "1 lugar" if places == 1 else f"{places} lugares"
+    parts = [f"div {bd['divisions']} ({champ_txt} · {place_txt})", f"playoffs {bd['playoffs']}"]
+    for key, name in (("conf_champions", "conf"), ("sb_winner", "SB"), ("awards", "premios")):
+        if bd.get(key):
+            parts.append(f"{name} {bd[key]}")
+    return " · ".join(parts)
+
+
 def build_message(
     scores: dict[str, Any],
     history: list[dict],
@@ -100,10 +115,9 @@ def build_message(
     for pos, (pid, p) in enumerate(ranked, 1):
         delta = p["total"] - prev["totals"][pid] if prev and pid in prev.get("totals", {}) else None
         medal = "\U0001F947" if pos == 1 and not tied else "▪️"
-        bd = p["breakdown"]
         lines.append(
             f"{medal} <b>{p['display_name']}</b>: <b>{p['total']}</b>{_fmt_delta(delta)}"
-            f"  <i>div {bd['divisions']} · playoffs {bd['playoffs']}</i>"
+            f"  <i>{_breakdown(p)}</i>"
         )
     if tied:
         lines.append("Empate \U0001F91D")
