@@ -23,6 +23,7 @@
     font: inherit; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--ink); min-width: 0;
   }
   select:invalid { color: var(--muted); }
+  select:disabled { opacity: .55; }
   .namecolor { display: flex; gap: 6px; align-items: center; }
   input[type=color] { width: 40px; height: 38px; padding: 2px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); cursor: pointer; }
   .tabs { display: flex; gap: 8px; margin: 24px 0 0; border-bottom: 2px solid var(--line); }
@@ -41,14 +42,21 @@
 
   /* tablero por división */
   .divbox { border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px 8px; background: var(--bg); }
-  .divbox h4 { margin: 0 0 8px; font-size: 14px; color: var(--ink2); text-transform: uppercase; letter-spacing: .04em; display: flex; justify-content: space-between; }
-  .divbox h4 small { color: var(--muted); text-transform: none; letter-spacing: 0; font-weight: normal; }
+  .divbox h4 { margin: 0 0 8px; font-size: 14px; color: var(--ink2); text-transform: uppercase; letter-spacing: .04em; display: flex; justify-content: space-between; align-items: center; }
+  .divbox h4 button { font: inherit; font-size: 12px; padding: 2px 8px; border: 1px solid var(--line); background: var(--surface); border-radius: 5px; color: var(--muted); cursor: pointer; text-transform: none; letter-spacing: 0; }
+  .divbox h4 button:disabled { opacity: .35; cursor: default; }
   ol.order { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 5px; }
-  ol.order li { display: grid; grid-template-columns: 22px 30px 1fr auto; align-items: center; gap: 8px; padding: 5px 6px 5px 0; border-radius: 8px; background: var(--surface); border: 1px solid var(--line); border-left: 6px solid var(--tc); cursor: grab; }
+  ol.order li { display: grid; grid-template-columns: 22px 30px 1fr auto; align-items: center; gap: 8px; padding: 5px 6px 5px 0; border-radius: 8px; background: var(--surface); border: 1px solid var(--line); border-left: 6px solid var(--tc); }
+  ol.order li.ranked { cursor: grab; }
+  ol.order li:not(.ranked) { cursor: pointer; border-style: dashed; background: transparent; }
+  ol.order li:not(.ranked):hover { background: var(--surface); border-style: solid; }
+  ol.order li:not(.ranked) img { filter: grayscale(1); opacity: .5; }
+  ol.order li:not(.ranked) .nm { color: var(--muted); }
+  ol.order li:not(.ranked) .btns { visibility: hidden; }
   ol.order li.dragging { opacity: .4; }
-  ol.order li:first-child { box-shadow: 0 0 0 2px var(--tc) inset; }
+  ol.order li.ranked:first-child { box-shadow: 0 0 0 2px var(--tc) inset; }
   ol.order .pos { text-align: center; font-weight: 700; color: var(--muted); font-size: 13px; }
-  ol.order li:first-child .pos { color: var(--ink); }
+  ol.order li.ranked:first-child .pos { color: var(--ink); }
   ol.order img { width: 30px; height: 30px; object-fit: contain; }
   ol.order .nm { font-size: 14px; line-height: 1.15; }
   ol.order .nm b { display: block; font-size: 14px; }
@@ -56,13 +64,13 @@
   ol.order .btns { display: flex; flex-direction: column; gap: 2px; }
   ol.order .btns button { font: inherit; font-size: 11px; line-height: 1; padding: 3px 7px; border: 1px solid var(--line); background: var(--surface); border-radius: 5px; cursor: pointer; color: var(--ink2); }
   ol.order .btns button:disabled { opacity: .3; cursor: default; }
+  .divbox.done h4 { color: var(--ok); }
 
   .actions { position: sticky; bottom: 0; background: var(--bg); padding: 12px 0; display: flex; gap: 10px; flex-wrap: wrap; border-top: 1px solid var(--line); margin-top: 24px; }
   button.primary, button.ghost { font: inherit; font-weight: 600; padding: 10px 16px; border-radius: 8px; cursor: pointer; border: 1px solid var(--accent); }
   button.primary { background: var(--accent); color: #fff; }
   button.ghost { background: var(--surface); color: var(--accent); }
   button:disabled { opacity: .5; cursor: default; }
-  button.small { font: inherit; font-size: 13px; padding: 4px 10px; border-radius: 6px; border: 1px solid var(--line); background: var(--surface); color: var(--ink2); cursor: pointer; margin: 6px 0 0; }
   .warnings { background: var(--warn-bg); border: 1px solid #fed7aa; color: var(--warn); border-radius: 8px; padding: 10px 14px; margin: 16px 0; font-size: 14px; }
   .warnings ul { margin: 6px 0 0; padding-left: 20px; }
   .ok { color: var(--ok); font-size: 14px; margin: 16px 0; }
@@ -111,6 +119,7 @@ const T = window.NFL_TEAMS || {};
 const CONFS = ["AFC", "NFC"];
 const DIVS = ["AFC East", "AFC North", "AFC South", "AFC West", "NFC East", "NFC North", "NFC South", "NFC West"];
 const TEAMS = Object.fromEntries(DIVS.map(d => [d, Object.keys(T).filter(a => T[a].division === d).sort()]));
+const SEEDS = [1, 2, 3, 4, 5, 6, 7];
 // Mantener en sincronía con AWARDS en scripts/score.py.
 const AWARDS = [
   ["MVP", 3, "Jugador más valioso"],
@@ -129,16 +138,16 @@ const logo = (abbr, px) => {
   const full = (T[abbr] || {}).logo || "";
   return `https://a.espncdn.com/combiner/i?img=${encodeURIComponent(full.replace("https://a.espncdn.com", ""))}&w=${px}&h=${px}`;
 };
+const confDivs = c => DIVS.filter(d => d.startsWith(c));
+const confTeams = c => confDivs(c).flatMap(d => TEAMS[d]);
+const label = a => `${a} · ${T[a].name}`;
 
-const confTeams = c => DIVS.filter(d => d.startsWith(c)).flatMap(d => TEAMS[d]);
-const opts = (teams, placeholder) =>
-  `<option value="" disabled selected>${placeholder}</option>` +
-  teams.map(a => `<option value="${a}">${a} · ${T[a].name}</option>`).join("");
+// ------------------------------------------------------------ render
 
-function teamLi(abbr, k) {
+function teamLi(abbr) {
   const t = T[abbr];
-  return `<li data-team="${abbr}" draggable="true" style="--tc:${t.color}">
-    <span class="pos">${k + 1}</span>
+  return `<li data-team="${abbr}" style="--tc:${t.color}" title="Toca para asignar el siguiente lugar">
+    <span class="pos">–</span>
     <img src="${logo(abbr, 60)}" alt="" loading="lazy" onerror="this.onerror=null;this.src='${t.logo}'">
     <span class="nm"><b>${abbr}</b><span>${t.short}</span></span>
     <span class="btns"><button type="button" data-move="-1" title="Subir">▲</button><button type="button" data-move="1" title="Bajar">▼</button></span>
@@ -149,79 +158,164 @@ function renderPlayer(i) {
   const el = document.querySelector(`.player[data-player="${i}"]`);
   const divsHtml = DIVS.map(d => `
     <div class="divbox" data-div="${d}">
-      <h4>${d} <small>1° = campeón</small></h4>
+      <h4>${d} <button type="button" data-reset="${d}" disabled>reiniciar</button></h4>
       <ol class="order" data-div="${d}">${TEAMS[d].map(teamLi).join("")}</ol>
     </div>`).join("");
   const poHtml = CONFS.map(c => `
     <div>
       <h3>${c} · seeds 1 a 7</h3>
-      ${[1,2,3,4,5,6,7].map(s => `
+      ${SEEDS.map(s => `
         <div class="row seed"><span class="lbl">#${s}</span>
-          <select name="po:${c}:${s}" required>${opts(confTeams(c), s <= 4 ? "Campeón de división" : "Wild card")}</select></div>`).join("")}
-      <button type="button" class="small" data-fill="${c}">Copiar campeones de división a seeds 1–4</button>
+          <select name="po:${c}:${s}" required></select></div>`).join("")}
       <div class="row" style="margin-top:14px"><span class="lbl">Campeón ${c}</span>
-        <select name="champ:${c}" required>${opts(confTeams(c), "Campeón de conferencia")}</select></div>
+        <select name="champ:${c}" required></select></div>
     </div>`).join("");
   el.innerHTML = `
     <h2>Divisiones <span class="status">3 pts por el campeón · 1 pt por cada lugar 2, 3 y 4 acertado</span></h2>
-    <p class="hint">Ordena los 4 equipos de cada división: arrastra o usa las flechas. El primero es tu campeón.</p>
+    <p class="hint">Toca los equipos de cada división en orden: el primero que toques es tu campeón, el segundo queda 2°, y así. Después puedes arrastrar o usar las flechas para ajustar.</p>
     <div class="grid4">${divsHtml}</div>
     <h2>Playoffs <span class="status">2 pts por clasificado · 4 por campeón de conferencia</span></h2>
-    <p class="hint">El orden del seed no da puntos, pero déjalo consistente: seeds 1–4 son los campeones de división.</p>
+    <p class="hint">Los seeds 1–4 son tus campeones de división (se llenan solos; elige el orden). Los seeds 5–7 son los wild cards. El orden del seed no da puntos.</p>
     <div class="grid2">${poHtml}</div>
     <div class="row" style="max-width:420px;margin-top:10px"><span class="lbl">Super Bowl <small class="status">5 pts</small></span>
-      <select name="sb" required>${opts([...confTeams("AFC"), ...confTeams("NFC")], "Ganador del Super Bowl")}</select></div>
+      <select name="sb" required></select></div>
     <h2>Premios <span class="status">se llenan cuando quieras</span></h2>
     <div class="grid2 awards">
       ${AWARDS.map(([a, p, desc]) => `<div class="row"><span class="lbl">${a} · ${p} pts<small>${desc}</small></span>
         <input type="text" name="aw:${a}" placeholder="Nombre del jugador / coach" autocomplete="off"></div>`).join("")}
     </div>`;
 
-  // orden por división: flechas
+  // división: tocar para asignar el siguiente lugar
+  el.querySelectorAll("ol.order li").forEach(li => li.addEventListener("click", e => {
+    if (e.target.closest("button")) return;
+    if (!li.classList.contains("ranked")) { rankTeam(li); afterChange(el); }
+  }));
+  // división: flechas
   el.querySelectorAll("[data-move]").forEach(b => b.addEventListener("click", () => {
     const li = b.closest("li"), ol = li.parentElement, dir = Number(b.dataset.move);
     const sib = dir < 0 ? li.previousElementSibling : li.nextElementSibling;
-    if (!sib) return;
+    if (!sib || !sib.classList.contains("ranked")) return;
     dir < 0 ? ol.insertBefore(li, sib) : ol.insertBefore(sib, li);
-    renumber(ol); saveDraft();
+    afterChange(el);
   }));
-  // orden por división: drag & drop
+  // división: drag & drop entre los ya ordenados
   el.querySelectorAll("ol.order").forEach(ol => {
-    ol.addEventListener("dragstart", e => { const li = e.target.closest("li"); if (!li) return; li.classList.add("dragging"); e.dataTransfer.effectAllowed = "move"; });
-    ol.addEventListener("dragend", e => { const li = e.target.closest("li"); if (li) li.classList.remove("dragging"); renumber(ol); saveDraft(); });
+    ol.addEventListener("dragstart", e => { const li = e.target.closest("li"); if (!li || !li.classList.contains("ranked")) { e.preventDefault(); return; } li.classList.add("dragging"); e.dataTransfer.effectAllowed = "move"; });
+    ol.addEventListener("dragend", e => { const li = e.target.closest("li"); if (li) li.classList.remove("dragging"); afterChange(el); });
     ol.addEventListener("dragover", e => {
       e.preventDefault();
       const dragging = ol.querySelector(".dragging"); if (!dragging) return;
-      const after = [...ol.querySelectorAll("li:not(.dragging)")].find(li => e.clientY < li.getBoundingClientRect().top + li.offsetHeight / 2);
-      after ? ol.insertBefore(dragging, after) : ol.appendChild(dragging);
+      const ranked = [...ol.querySelectorAll("li.ranked:not(.dragging)")];
+      const after = ranked.find(li => e.clientY < li.getBoundingClientRect().top + li.offsetHeight / 2);
+      const lastRanked = ranked[ranked.length - 1];
+      after ? ol.insertBefore(dragging, after) : ol.insertBefore(dragging, lastRanked ? lastRanked.nextSibling : ol.firstChild);
     });
     renumber(ol);
   });
-  el.querySelectorAll("[data-fill]").forEach(b => b.addEventListener("click", () => {
-    const c = b.dataset.fill;
-    DIVS.filter(d => d.startsWith(c)).forEach((d, k) => {
-      const champ = orderOf(el, d)[0];
-      if (champ) el.querySelector(`[name="po:${c}:${k + 1}"]`).value = champ;
-    });
-    saveDraft();
+  el.querySelectorAll("[data-reset]").forEach(b => b.addEventListener("click", () => {
+    setOrder(el, b.dataset.reset, []);
+    afterChange(el);
   }));
+  // playoffs: al elegir un equipo que ya estaba en otro seed, se intercambian
+  el.querySelectorAll('select[name^="po:"]').forEach(sel => {
+    sel.dataset.prev = "";
+    sel.addEventListener("change", () => {
+      const conf = sel.name.split(":")[1];
+      const other = [...el.querySelectorAll(`select[name^="po:${conf}:"]`)].find(o => o !== sel && o.value && o.value === sel.value);
+      if (other) other.value = sel.dataset.prev || "";
+      afterChange(el);
+    });
+  });
+  el.addEventListener("change", () => afterChange(el));
+  refreshPlayoffs(el);
 }
 
-function renumber(ol) {
-  [...ol.children].forEach((li, k) => {
-    li.querySelector(".pos").textContent = k + 1;
-    li.querySelector('[data-move="-1"]').disabled = k === 0;
-    li.querySelector('[data-move="1"]').disabled = k === ol.children.length - 1;
-  });
+function afterChange(el) {
+  el.querySelectorAll("ol.order").forEach(renumber);
+  refreshPlayoffs(el);
+  saveDraft();
 }
-function orderOf(el, d) { return [...el.querySelector(`ol.order[data-div="${d}"]`).children].map(li => li.dataset.team); }
-function setOrder(el, d, list) {
-  const ol = el.querySelector(`ol.order[data-div="${d}"]`);
-  const valid = (list || []).filter(t => TEAMS[d].includes(t));
-  const rest = TEAMS[d].filter(t => !valid.includes(t));
-  [...valid, ...rest].forEach(t => ol.appendChild(ol.querySelector(`li[data-team="${t}"]`)));
+
+// ------------------------------------------------------------ orden por división
+
+function rankTeam(li) {
+  const ol = li.parentElement;
+  const ranked = ol.querySelectorAll("li.ranked");
+  const last = ranked[ranked.length - 1];
+  li.classList.add("ranked");
+  ol.insertBefore(li, last ? last.nextSibling : ol.firstChild);
   renumber(ol);
 }
+function renumber(ol) {
+  const ranked = [...ol.querySelectorAll("li.ranked")];
+  [...ol.children].forEach(li => {
+    const k = ranked.indexOf(li);
+    li.querySelector(".pos").textContent = k >= 0 ? k + 1 : "–";
+    li.draggable = k >= 0;
+    li.querySelector('[data-move="-1"]').disabled = k <= 0;
+    li.querySelector('[data-move="1"]').disabled = k < 0 || k === ranked.length - 1;
+  });
+  const box = ol.closest(".divbox");
+  box.classList.toggle("done", ranked.length === ol.children.length);
+  box.querySelector("[data-reset]").disabled = ranked.length === 0;
+}
+function orderOf(el, d) { return [...el.querySelectorAll(`ol.order[data-div="${d}"] li.ranked`)].map(li => li.dataset.team); }
+function setOrder(el, d, list) {
+  const ol = el.querySelector(`ol.order[data-div="${d}"]`);
+  ol.querySelectorAll("li").forEach(li => li.classList.remove("ranked"));
+  // sin orden: alfabético, todos "sin asignar"
+  TEAMS[d].forEach(t => ol.appendChild(ol.querySelector(`li[data-team="${t}"]`)));
+  (list || []).filter(t => TEAMS[d].includes(t)).forEach(t => rankTeam(ol.querySelector(`li[data-team="${t}"]`)));
+  renumber(ol);
+}
+
+// ------------------------------------------------------------ playoffs dependientes
+
+function setOptions(sel, teams, placeholder, disabledSet = new Set()) {
+  const cur = sel.value;
+  sel.innerHTML = `<option value="" disabled ${cur && teams.includes(cur) ? "" : "selected"}>${placeholder}</option>` +
+    teams.map(a => `<option value="${a}" ${disabledSet.has(a) && a !== cur ? "disabled" : ""}>${label(a)}</option>`).join("");
+  sel.value = teams.includes(cur) ? cur : "";
+  sel.dataset.prev = sel.value;
+}
+
+function refreshPlayoffs(el) {
+  const q = name => el.querySelector(`[name="${name}"]`);
+  const champs = {};
+  CONFS.forEach(c => {
+    champs[c] = confDivs(c).map(d => orderOf(el, d)[0]).filter(Boolean);
+    const wild = confTeams(c).filter(t => !champs[c].includes(t));
+    const seedSel = s => q(`po:${c}:${s}`);
+    // 1-4: solo campeones de división; 5-7: solo el resto.
+    // Primera pasada: opciones nuevas (setOptions descarta valores que ya no
+    // están en el pool). Segunda pasada: deshabilitar los ya usados.
+    const poolOf = s => (s <= 4 ? champs[c] : wild);
+    const placeholderOf = s => (s <= 4 ? (champs[c].length ? "Campeón de división" : "Primero ordena las divisiones") : "Wild card");
+    SEEDS.forEach(s => setOptions(seedSel(s), poolOf(s), placeholderOf(s)));
+    // campeones nuevos ocupan el primer seed 1-4 libre
+    champs[c].forEach(t => {
+      if (SEEDS.slice(0, 4).some(s => seedSel(s).value === t)) return;
+      const free = SEEDS.slice(0, 4).find(s => !seedSel(s).value);
+      if (free) { seedSel(free).value = t; seedSel(free).dataset.prev = t; }
+    });
+    SEEDS.forEach(s => {
+      const sel = seedSel(s);
+      const taken = new Set(SEEDS.filter(o => o !== s).map(o => seedSel(o).value).filter(Boolean));
+      setOptions(sel, poolOf(s), placeholderOf(s), taken);
+      sel.disabled = poolOf(s).length === 0;
+    });
+    // campeón de conferencia: solo tus 7
+    const seven = SEEDS.map(s => seedSel(s).value).filter(Boolean);
+    setOptions(q(`champ:${c}`), seven, seven.length ? "Campeón de conferencia" : "Primero elige los playoffs");
+    q(`champ:${c}`).disabled = seven.length === 0;
+  });
+  // Super Bowl: uno de los dos campeones de conferencia
+  const finalists = CONFS.map(c => q(`champ:${c}`).value).filter(Boolean);
+  setOptions(q("sb"), finalists, finalists.length ? "Ganador del Super Bowl" : "Primero elige los campeones de conferencia");
+  q("sb").disabled = finalists.length === 0;
+}
+
+// ------------------------------------------------------------ leer / validar / generar
 
 function slug(s) {
   return s.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "");
@@ -232,7 +326,7 @@ function readPlayer(i) {
   const v = name => (el.querySelector(`[name="${name}"]`) || {}).value || "";
   const divisions = Object.fromEntries(DIVS.map(d => [d, orderOf(el, d)]));
   const playoffs = {};
-  CONFS.forEach(c => { playoffs[c] = [1,2,3,4,5,6,7].map(s => v(`po:${c}:${s}`)); });
+  CONFS.forEach(c => { playoffs[c] = SEEDS.map(s => v(`po:${c}:${s}`)); });
   playoffs.afc_champion = v("champ:AFC");
   playoffs.nfc_champion = v("champ:NFC");
   playoffs.sb_winner = v("sb");
@@ -242,17 +336,14 @@ function readPlayer(i) {
 
 function validate(p, label) {
   const w = [];
+  const incomplete = DIVS.filter(d => p.divisions[d].length < 4);
+  if (incomplete.length) w.push(`${label}: falta ordenar ${incomplete.map(d => `${d} (${p.divisions[d].length}/4)`).join(", ")}`);
   CONFS.forEach(c => {
     const picks = p.playoffs[c];
     const empty = picks.filter(x => !x).length;
     if (empty) w.push(`${label}: faltan ${empty} seeds en ${c}`);
     const dup = picks.filter((x, k) => x && picks.indexOf(x) !== k);
     if (dup.length) w.push(`${label}: equipo repetido en playoffs ${c} (${[...new Set(dup)].join(", ")})`);
-    const divWinners = DIVS.filter(d => d.startsWith(c)).map(d => p.divisions[d][0]).filter(Boolean);
-    const notIn = divWinners.filter(t => !picks.includes(t));
-    if (notIn.length) w.push(`${label}: ${notIn.join(", ")} es campeón de división pero no está en los playoffs ${c}`);
-    const wrongSeed = divWinners.filter(t => picks.indexOf(t) >= 4);
-    if (wrongSeed.length) w.push(`${label}: ${wrongSeed.join(", ")} es campeón de división pero está en seed 5–7 de ${c}`);
     const champ = p.playoffs[`${c.toLowerCase()}_champion`];
     if (!champ) w.push(`${label}: falta campeón ${c}`);
     else if (!picks.includes(champ)) w.push(`${label}: el campeón ${c} (${champ}) no está en sus playoffs`);
@@ -291,7 +382,8 @@ function showWarnings(list) {
     : `<div class="ok">✓ Sin observaciones. Listo para commitear.</div>`;
 }
 
-// ---- importar / exportar por jugador
+// ------------------------------------------------------------ importar / exportar
+
 function downloadText(name, text) {
   const blob = new Blob([text + "\n"], { type: "application/json" });
   const a = Object.assign(document.createElement("a"), { href: URL.createObjectURL(blob), download: name });
@@ -308,8 +400,14 @@ function applyPlayer(i, p) {
   if (/^#[0-9a-f]{6}$/i.test(p.color || "")) document.getElementById(`color${i}`).value = p.color;
   DIVS.forEach(d => { const v = (p.divisions || {})[d]; setOrder(el, d, Array.isArray(v) ? v : (v ? [v] : [])); });
   const po = p.playoffs || {};
-  CONFS.forEach(c => (po[c] || []).forEach((t, k) => set(`po:${c}:${k + 1}`, t || "")));
-  set("champ:AFC", po.afc_champion || ""); set("champ:NFC", po.nfc_champion || ""); set("sb", po.sb_winner || "");
+  // los selects dependen unos de otros: refrescar entre cada nivel
+  refreshPlayoffs(el);
+  CONFS.forEach(c => SEEDS.forEach(s => set(`po:${c}:${s}`, (po[c] || [])[s - 1] || "")));
+  refreshPlayoffs(el);
+  set("champ:AFC", po.afc_champion || ""); set("champ:NFC", po.nfc_champion || "");
+  refreshPlayoffs(el);
+  set("sb", po.sb_winner || "");
+  refreshPlayoffs(el);
   AWARDS.forEach(([a]) => set(`aw:${a}`, (p.awards || {})[a] || ""));
 }
 
@@ -327,37 +425,24 @@ function importPicks(text) {
   setStatus(players.length === 1 ? `importado en la pestaña ${targets[0] + 1}` : "importados los dos jugadores");
 }
 
-// ---- borrador en localStorage
+// ------------------------------------------------------------ borrador (localStorage)
+
 function formState() {
-  const s = {
+  return {
     season: document.getElementById("season").value,
     names: [0, 1].map(i => document.getElementById(`name${i}`).value),
     colors: [0, 1].map(i => document.getElementById(`color${i}`).value),
-    fields: {}, orders: {},
+    players: [0, 1].map(i => { const p = readPlayer(i); return { divisions: p.divisions, playoffs: p.playoffs, awards: p.awards }; }),
   };
-  document.querySelectorAll(".player select, .player input").forEach(f => { s.fields[`${f.closest(".player").dataset.player}|${f.name}`] = f.value; });
-  document.querySelectorAll(".player").forEach(el => DIVS.forEach(d => { s.orders[`${el.dataset.player}|${d}`] = orderOf(el, d); }));
-  return s;
 }
 function saveDraft() {
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify(formState())); setStatus("borrador guardado"); } catch (e) {}
 }
 function loadDraft() {
   let s; try { s = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null"); } catch (e) {}
-  if (!s) return;
+  if (!s || !s.players) return;
   if (s.season) document.getElementById("season").value = s.season;
-  (s.names || []).forEach((n, i) => { document.getElementById(`name${i}`).value = n; syncTab(i); });
-  (s.colors || []).forEach((c, i) => { if (c) document.getElementById(`color${i}`).value = c; });
-  Object.entries(s.fields || {}).forEach(([k, v]) => {
-    const [pi, name] = k.split("|");
-    const f = document.querySelector(`.player[data-player="${pi}"] [name="${name}"]`);
-    if (f) f.value = v;
-  });
-  Object.entries(s.orders || {}).forEach(([k, list]) => {
-    const [pi, d] = k.split("|");
-    const el = document.querySelector(`.player[data-player="${pi}"]`);
-    if (el && DIVS.includes(d)) setOrder(el, d, list);
-  });
+  s.players.forEach((p, i) => applyPlayer(i, { ...p, display_name: (s.names || [])[i] || "", color: (s.colors || [])[i] }));
   setStatus("borrador restaurado");
 }
 let statusTimer;
@@ -366,14 +451,15 @@ function syncTab(i) {
   document.querySelector(`.tabs button[data-tab="${i}"]`).textContent = document.getElementById(`name${i}`).value.trim() || `Jugador ${i + 1}`;
 }
 
-// ---- init
+// ------------------------------------------------------------ init
+
 if (!Object.keys(T).length) {
   document.querySelector("main").insertAdjacentHTML("afterbegin", '<div class="warnings">No cargó <code>teams.js</code>. Corre <code>python scripts/gen_teams.py</code>.</div>');
 }
 [0, 1].forEach(renderPlayer);
 loadDraft();
-document.addEventListener("change", saveDraft);
-document.addEventListener("input", e => { if (e.target.matches("input")) saveDraft(); });
+["season", "name0", "name1", "color0", "color1"].forEach(id => document.getElementById(id).addEventListener("input", saveDraft));
+document.querySelectorAll(".player").forEach(el => el.addEventListener("input", e => { if (e.target.matches("input")) saveDraft(); }));
 
 document.querySelectorAll(".tabs button").forEach(b => b.addEventListener("click", () => {
   document.querySelectorAll(".tabs button").forEach(x => x.classList.toggle("active", x === b));
