@@ -42,8 +42,8 @@ def test_message_without_history(scores_2025, games_wk18):
     assert msg.startswith("\U0001F3C8 <b>NFL Pool 2025</b> · semana 18")
     # ranking: Oráculo primero con medalla, sin delta porque no hay historial
     lines = msg.splitlines()
-    assert lines[2].startswith("\U0001F947 <b>Oráculo</b>: <b>52</b>  <i>div 24")
-    assert lines[3].startswith("▪️ <b>Alfredo</b>: <b>21</b>  <i>div 3")
+    assert lines[2].startswith("\U0001F947 <b>Oráculo</b>: <b>76</b>  <i>div 48")
+    assert lines[3].startswith("▪️ <b>Alfredo</b>: <b>30</b>  <i>div 12")
     assert "Cambios de líder" not in msg
     assert "AFC: NE · PIT · JAX · DEN" in msg
     assert "NFC: PHI · CHI · CAR · SEA" in msg
@@ -60,18 +60,18 @@ def test_message_with_history_shows_delta_and_changes(scores_2025, games_wk18):
         {"computed_at": "2026-10-06T12:00:00+00:00", "totals": {"alfredo": 10, "oraculo": 40}, "current": {}},
         {"computed_at": "2026-10-13T12:00:00+00:00", "totals": {"alfredo": 19, "oraculo": 45}, "current": prev_current},
         # misma fecha que el actual: se ignora para el delta
-        {"computed_at": "2026-10-20T11:00:00+00:00", "totals": {"alfredo": 21, "oraculo": 52}, "current": scores_2025["current"]},
+        {"computed_at": "2026-10-20T11:00:00+00:00", "totals": {"alfredo": 30, "oraculo": 76}, "current": scores_2025["current"]},
     ]
     msg = build_message(scores_2025, history, games_wk18)
-    assert "<b>Oráculo</b>: <b>52</b> (+7)" in msg
-    assert "<b>Alfredo</b>: <b>21</b> (+2)" in msg
+    assert "<b>Oráculo</b>: <b>76</b> (+31)" in msg
+    assert "<b>Alfredo</b>: <b>30</b> (+11)" in msg
     assert "• AFC West: KC → <b>DEN</b>" in msg
     assert "• AFC: entra DEN · sale KC" in msg
     assert "Leaderboard" not in msg  # sin url
 
 
 def test_message_pending_games_and_tie(scores_2025, games_pre):
-    scores_2025["players"]["alfredo"]["total"] = 52
+    scores_2025["players"]["alfredo"]["total"] = 76
     msg = build_message(scores_2025, [], games_pre)
     assert "Empate" in msg
     assert "\U0001F947" not in msg

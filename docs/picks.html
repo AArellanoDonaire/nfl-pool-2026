@@ -11,9 +11,10 @@
   }
   * { box-sizing: border-box; }
   body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
-  main { max-width: 1080px; margin: 0 auto; padding: 24px 16px 96px; }
+  main { max-width: 1100px; margin: 0 auto; padding: 24px 16px 120px; }
   h1 { font-size: 28px; margin: 0 0 4px; }
-  h2 { font-size: 20px; margin: 28px 0 10px; }
+  h2 { font-size: 20px; margin: 28px 0 6px; }
+  h2 .status { font-weight: normal; }
   h3 { font-size: 15px; margin: 18px 0 8px; color: var(--ink2); text-transform: uppercase; letter-spacing: .04em; }
   p.hint { color: var(--muted); margin: 0 0 16px; font-size: 14px; }
   .top { display: flex; gap: 16px; flex-wrap: wrap; align-items: end; }
@@ -30,12 +31,32 @@
   .player { display: none; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 20px; }
   .player.active { display: block; }
   .grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px 28px; }
+  .grid4 { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px; }
   .row { display: grid; grid-template-columns: 110px 1fr; align-items: center; gap: 10px; margin: 4px 0; }
   .row .lbl { font-size: 14px; color: var(--ink2); }
   .seed { grid-template-columns: 64px 1fr; }
   .seed .lbl { font-variant-numeric: tabular-nums; }
-  .awards .row { grid-template-columns: 64px 1fr; }
-  .awards .lbl small { color: var(--muted); font-weight: normal; }
+  .awards .row { grid-template-columns: 200px 1fr; }
+  .awards .lbl small { color: var(--muted); font-weight: normal; display: block; font-size: 12px; line-height: 1.2; }
+
+  /* tablero por división */
+  .divbox { border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px 8px; background: var(--bg); }
+  .divbox h4 { margin: 0 0 8px; font-size: 14px; color: var(--ink2); text-transform: uppercase; letter-spacing: .04em; display: flex; justify-content: space-between; }
+  .divbox h4 small { color: var(--muted); text-transform: none; letter-spacing: 0; font-weight: normal; }
+  ol.order { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 5px; }
+  ol.order li { display: grid; grid-template-columns: 22px 30px 1fr auto; align-items: center; gap: 8px; padding: 5px 6px 5px 0; border-radius: 8px; background: var(--surface); border: 1px solid var(--line); border-left: 6px solid var(--tc); cursor: grab; }
+  ol.order li.dragging { opacity: .4; }
+  ol.order li:first-child { box-shadow: 0 0 0 2px var(--tc) inset; }
+  ol.order .pos { text-align: center; font-weight: 700; color: var(--muted); font-size: 13px; }
+  ol.order li:first-child .pos { color: var(--ink); }
+  ol.order img { width: 30px; height: 30px; object-fit: contain; }
+  ol.order .nm { font-size: 14px; line-height: 1.15; }
+  ol.order .nm b { display: block; font-size: 14px; }
+  ol.order .nm span { color: var(--muted); font-size: 12px; }
+  ol.order .btns { display: flex; flex-direction: column; gap: 2px; }
+  ol.order .btns button { font: inherit; font-size: 11px; line-height: 1; padding: 3px 7px; border: 1px solid var(--line); background: var(--surface); border-radius: 5px; cursor: pointer; color: var(--ink2); }
+  ol.order .btns button:disabled { opacity: .3; cursor: default; }
+
   .actions { position: sticky; bottom: 0; background: var(--bg); padding: 12px 0; display: flex; gap: 10px; flex-wrap: wrap; border-top: 1px solid var(--line); margin-top: 24px; }
   button.primary, button.ghost { font: inherit; font-weight: 600; padding: 10px 16px; border-radius: 8px; cursor: pointer; border: 1px solid var(--accent); }
   button.primary { background: var(--accent); color: #fff; }
@@ -52,7 +73,7 @@
 <body>
 <main>
   <h1>NFL Pool 2026 · Picks</h1>
-  <p class="hint">Se usa una vez. Llena los dos jugadores, genera el JSON y commitéalo como <code>docs/data/picks.json</code>. El borrador se guarda solo en este navegador. El color de cada jugador es el que usa el leaderboard.</p>
+  <p class="hint">Cada jugador puede llenar su pestaña por separado: <b>Descargar solo este jugador</b>, mandar el archivo al otro, y el otro lo carga con <b>Importar JSON</b>. Con los dos completos, <b>Generar JSON</b> y commitear como <code>docs/data/picks.json</code>. El borrador se guarda solo en este navegador y el color de cada jugador es el que usa el leaderboard.</p>
 
   <div class="top">
     <label>Temporada <input type="number" id="season" value="2026" min="2020" max="2100" style="width:100px"></label>
@@ -75,41 +96,61 @@
     <button type="button" class="primary" id="gen">Generar JSON</button>
     <button type="button" class="ghost" id="copy" disabled>Copiar</button>
     <button type="button" class="ghost" id="download" disabled>Descargar picks.json</button>
+    <button type="button" class="ghost" id="download-one">Descargar solo este jugador</button>
+    <button type="button" class="ghost" id="import">Importar JSON</button>
+    <input type="file" id="import-file" accept="application/json,.json" hidden>
     <button type="button" class="ghost" id="reset" style="margin-left:auto;border-color:var(--line);color:var(--ink2)">Borrar borrador</button>
   </div>
   <textarea id="out" readonly placeholder="Acá aparece el JSON"></textarea>
 </main>
 
+<script src="teams.js"></script>
 <script>
-// Abreviaciones ESPN (ver tests/fixtures/README.md): WSH, LAR, LAC, LV, JAX.
-const TEAMS = {
-  "AFC East":  [["BUF","Buffalo Bills"],["MIA","Miami Dolphins"],["NE","New England Patriots"],["NYJ","New York Jets"]],
-  "AFC North": [["BAL","Baltimore Ravens"],["CIN","Cincinnati Bengals"],["CLE","Cleveland Browns"],["PIT","Pittsburgh Steelers"]],
-  "AFC South": [["HOU","Houston Texans"],["IND","Indianapolis Colts"],["JAX","Jacksonville Jaguars"],["TEN","Tennessee Titans"]],
-  "AFC West":  [["DEN","Denver Broncos"],["KC","Kansas City Chiefs"],["LV","Las Vegas Raiders"],["LAC","Los Angeles Chargers"]],
-  "NFC East":  [["DAL","Dallas Cowboys"],["NYG","New York Giants"],["PHI","Philadelphia Eagles"],["WSH","Washington Commanders"]],
-  "NFC North": [["CHI","Chicago Bears"],["DET","Detroit Lions"],["GB","Green Bay Packers"],["MIN","Minnesota Vikings"]],
-  "NFC South": [["ATL","Atlanta Falcons"],["CAR","Carolina Panthers"],["NO","New Orleans Saints"],["TB","Tampa Bay Buccaneers"]],
-  "NFC West":  [["ARI","Arizona Cardinals"],["LAR","Los Angeles Rams"],["SF","San Francisco 49ers"],["SEA","Seattle Seahawks"]],
-};
+// Equipos: docs/teams.js (generado por scripts/gen_teams.py desde ESPN).
+const T = window.NFL_TEAMS || {};
 const CONFS = ["AFC", "NFC"];
-const DIVS = Object.keys(TEAMS);
-const AWARDS = [["MVP","3 pts"],["OPOY","2"],["DPOY","2"],["OROY","2"],["DROY","2"],["CPOY","2"],["COY","2"]];
+const DIVS = ["AFC East", "AFC North", "AFC South", "AFC West", "NFC East", "NFC North", "NFC South", "NFC West"];
+const TEAMS = Object.fromEntries(DIVS.map(d => [d, Object.keys(T).filter(a => T[a].division === d).sort()]));
+// Mantener en sincronía con AWARDS en scripts/score.py.
+const AWARDS = [
+  ["MVP", 3, "Jugador más valioso"],
+  ["OPOY", 2, "Jugador ofensivo del año"],
+  ["DPOY", 2, "Jugador defensivo del año"],
+  ["OROY", 2, "Novato ofensivo del año"],
+  ["DROY", 2, "Novato defensivo del año"],
+  ["CPOY", 2, "Regreso del año"],
+  ["COY", 2, "Entrenador del año"],
+  ["ACOY", 2, "Asistente del año"],
+  ["SB_MVP", 2, "MVP del Super Bowl"],
+];
 const STORAGE_KEY = "nfl-pool-picks-draft";
+// Logo reescalado por el combiner de ESPN; si falla, el PNG de 500px.
+const logo = (abbr, px) => {
+  const full = (T[abbr] || {}).logo || "";
+  return `https://a.espncdn.com/combiner/i?img=${encodeURIComponent(full.replace("https://a.espncdn.com", ""))}&w=${px}&h=${px}`;
+};
 
 const confTeams = c => DIVS.filter(d => d.startsWith(c)).flatMap(d => TEAMS[d]);
 const opts = (teams, placeholder) =>
   `<option value="" disabled selected>${placeholder}</option>` +
-  teams.map(([a, n]) => `<option value="${a}">${a} · ${n}</option>`).join("");
+  teams.map(a => `<option value="${a}">${a} · ${T[a].name}</option>`).join("");
+
+function teamLi(abbr, k) {
+  const t = T[abbr];
+  return `<li data-team="${abbr}" draggable="true" style="--tc:${t.color}">
+    <span class="pos">${k + 1}</span>
+    <img src="${logo(abbr, 60)}" alt="" loading="lazy" onerror="this.onerror=null;this.src='${t.logo}'">
+    <span class="nm"><b>${abbr}</b><span>${t.short}</span></span>
+    <span class="btns"><button type="button" data-move="-1" title="Subir">▲</button><button type="button" data-move="1" title="Bajar">▼</button></span>
+  </li>`;
+}
 
 function renderPlayer(i) {
   const el = document.querySelector(`.player[data-player="${i}"]`);
-  const divsHtml = CONFS.map(c => `
-    <div>
-      <h3>${c}</h3>
-      ${DIVS.filter(d => d.startsWith(c)).map(d => `
-        <div class="row"><span class="lbl">${d}</span>
-          <select name="div:${d}" required>${opts(TEAMS[d], "Campeón de división")}</select></div>`).join("")}
+  const divsHtml = DIVS.map(d => `
+    <div class="divbox" data-div="${d}">
+      <h4>${d} <small>1° = campeón</small></h4>
+      <ol class="order" data-div="${d}">${TEAMS[d].map(teamLi).join("")}</ol>
     </div>`).join("");
   const poHtml = CONFS.map(c => `
     <div>
@@ -122,8 +163,9 @@ function renderPlayer(i) {
         <select name="champ:${c}" required>${opts(confTeams(c), "Campeón de conferencia")}</select></div>
     </div>`).join("");
   el.innerHTML = `
-    <h2>Divisiones <span class="status">3 pts c/u</span></h2>
-    <div class="grid2">${divsHtml}</div>
+    <h2>Divisiones <span class="status">3 pts por el campeón · 1 pt por cada lugar 2, 3 y 4 acertado</span></h2>
+    <p class="hint">Ordena los 4 equipos de cada división: arrastra o usa las flechas. El primero es tu campeón.</p>
+    <div class="grid4">${divsHtml}</div>
     <h2>Playoffs <span class="status">2 pts por clasificado · 4 por campeón de conferencia</span></h2>
     <p class="hint">El orden del seed no da puntos, pero déjalo consistente: seeds 1–4 son los campeones de división.</p>
     <div class="grid2">${poHtml}</div>
@@ -131,27 +173,64 @@ function renderPlayer(i) {
       <select name="sb" required>${opts([...confTeams("AFC"), ...confTeams("NFC")], "Ganador del Super Bowl")}</select></div>
     <h2>Premios <span class="status">se llenan cuando quieras</span></h2>
     <div class="grid2 awards">
-      ${AWARDS.map(([a, p]) => `<div class="row"><span class="lbl">${a} <small>${p}</small></span>
+      ${AWARDS.map(([a, p, desc]) => `<div class="row"><span class="lbl">${a} · ${p} pts<small>${desc}</small></span>
         <input type="text" name="aw:${a}" placeholder="Nombre del jugador / coach" autocomplete="off"></div>`).join("")}
     </div>`;
+
+  // orden por división: flechas
+  el.querySelectorAll("[data-move]").forEach(b => b.addEventListener("click", () => {
+    const li = b.closest("li"), ol = li.parentElement, dir = Number(b.dataset.move);
+    const sib = dir < 0 ? li.previousElementSibling : li.nextElementSibling;
+    if (!sib) return;
+    dir < 0 ? ol.insertBefore(li, sib) : ol.insertBefore(sib, li);
+    renumber(ol); saveDraft();
+  }));
+  // orden por división: drag & drop
+  el.querySelectorAll("ol.order").forEach(ol => {
+    ol.addEventListener("dragstart", e => { const li = e.target.closest("li"); if (!li) return; li.classList.add("dragging"); e.dataTransfer.effectAllowed = "move"; });
+    ol.addEventListener("dragend", e => { const li = e.target.closest("li"); if (li) li.classList.remove("dragging"); renumber(ol); saveDraft(); });
+    ol.addEventListener("dragover", e => {
+      e.preventDefault();
+      const dragging = ol.querySelector(".dragging"); if (!dragging) return;
+      const after = [...ol.querySelectorAll("li:not(.dragging)")].find(li => e.clientY < li.getBoundingClientRect().top + li.offsetHeight / 2);
+      after ? ol.insertBefore(dragging, after) : ol.appendChild(dragging);
+    });
+    renumber(ol);
+  });
   el.querySelectorAll("[data-fill]").forEach(b => b.addEventListener("click", () => {
     const c = b.dataset.fill;
     DIVS.filter(d => d.startsWith(c)).forEach((d, k) => {
-      const v = el.querySelector(`[name="div:${d}"]`).value;
-      if (v) el.querySelector(`[name="po:${c}:${k + 1}"]`).value = v;
+      const champ = orderOf(el, d)[0];
+      if (champ) el.querySelector(`[name="po:${c}:${k + 1}"]`).value = champ;
     });
     saveDraft();
   }));
 }
 
+function renumber(ol) {
+  [...ol.children].forEach((li, k) => {
+    li.querySelector(".pos").textContent = k + 1;
+    li.querySelector('[data-move="-1"]').disabled = k === 0;
+    li.querySelector('[data-move="1"]').disabled = k === ol.children.length - 1;
+  });
+}
+function orderOf(el, d) { return [...el.querySelector(`ol.order[data-div="${d}"]`).children].map(li => li.dataset.team); }
+function setOrder(el, d, list) {
+  const ol = el.querySelector(`ol.order[data-div="${d}"]`);
+  const valid = (list || []).filter(t => TEAMS[d].includes(t));
+  const rest = TEAMS[d].filter(t => !valid.includes(t));
+  [...valid, ...rest].forEach(t => ol.appendChild(ol.querySelector(`li[data-team="${t}"]`)));
+  renumber(ol);
+}
+
 function slug(s) {
-  return s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "");
+  return s.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "");
 }
 
 function readPlayer(i) {
   const el = document.querySelector(`.player[data-player="${i}"]`);
   const v = name => (el.querySelector(`[name="${name}"]`) || {}).value || "";
-  const divisions = Object.fromEntries(DIVS.map(d => [d, v(`div:${d}`)]));
+  const divisions = Object.fromEntries(DIVS.map(d => [d, orderOf(el, d)]));
   const playoffs = {};
   CONFS.forEach(c => { playoffs[c] = [1,2,3,4,5,6,7].map(s => v(`po:${c}:${s}`)); });
   playoffs.afc_champion = v("champ:AFC");
@@ -163,15 +242,13 @@ function readPlayer(i) {
 
 function validate(p, label) {
   const w = [];
-  const missingDiv = DIVS.filter(d => !p.divisions[d]);
-  if (missingDiv.length) w.push(`${label}: faltan divisiones (${missingDiv.join(", ")})`);
   CONFS.forEach(c => {
     const picks = p.playoffs[c];
     const empty = picks.filter(x => !x).length;
     if (empty) w.push(`${label}: faltan ${empty} seeds en ${c}`);
     const dup = picks.filter((x, k) => x && picks.indexOf(x) !== k);
     if (dup.length) w.push(`${label}: equipo repetido en playoffs ${c} (${[...new Set(dup)].join(", ")})`);
-    const divWinners = DIVS.filter(d => d.startsWith(c)).map(d => p.divisions[d]).filter(Boolean);
+    const divWinners = DIVS.filter(d => d.startsWith(c)).map(d => p.divisions[d][0]).filter(Boolean);
     const notIn = divWinners.filter(t => !picks.includes(t));
     if (notIn.length) w.push(`${label}: ${notIn.join(", ")} es campeón de división pero no está en los playoffs ${c}`);
     const wrongSeed = divWinners.filter(t => picks.indexOf(t) >= 4);
@@ -189,6 +266,9 @@ function validate(p, label) {
   return w;
 }
 
+function nowIso() { return new Date().toISOString().replace(/\.\d{3}Z$/, "Z"); }
+function seasonValue() { return Number(document.getElementById("season").value) || new Date().getFullYear(); }
+
 function build() {
   const players = {};
   const warnings = [];
@@ -201,9 +281,7 @@ function build() {
     warnings.push(...validate(p, p.display_name || `Jugador ${i + 1}`));
     players[id] = p;
   });
-  const season = Number(document.getElementById("season").value) || new Date().getFullYear();
-  const json = { season, locked_at: new Date().toISOString().replace(/\.\d{3}Z$/, "Z"), players };
-  return { json, warnings };
+  return { json: { season: seasonValue(), locked_at: nowIso(), players }, warnings };
 }
 
 function showWarnings(list) {
@@ -213,10 +291,52 @@ function showWarnings(list) {
     : `<div class="ok">✓ Sin observaciones. Listo para commitear.</div>`;
 }
 
+// ---- importar / exportar por jugador
+function downloadText(name, text) {
+  const blob = new Blob([text + "\n"], { type: "application/json" });
+  const a = Object.assign(document.createElement("a"), { href: URL.createObjectURL(blob), download: name });
+  document.body.appendChild(a); a.click(); a.remove();
+}
+function activeTab() { return Number(document.querySelector(".tabs button.active").dataset.tab); }
+
+// Carga un jugador (schema de picks.json) en la pestaña i. Acepta divisions
+// como lista ordenada o como string (solo campeón, formato viejo).
+function applyPlayer(i, p) {
+  const el = document.querySelector(`.player[data-player="${i}"]`);
+  const set = (name, v) => { const f = el.querySelector(`[name="${name}"]`); if (f && v != null) f.value = v; };
+  document.getElementById(`name${i}`).value = p.display_name || ""; syncTab(i);
+  if (/^#[0-9a-f]{6}$/i.test(p.color || "")) document.getElementById(`color${i}`).value = p.color;
+  DIVS.forEach(d => { const v = (p.divisions || {})[d]; setOrder(el, d, Array.isArray(v) ? v : (v ? [v] : [])); });
+  const po = p.playoffs || {};
+  CONFS.forEach(c => (po[c] || []).forEach((t, k) => set(`po:${c}:${k + 1}`, t || "")));
+  set("champ:AFC", po.afc_champion || ""); set("champ:NFC", po.nfc_champion || ""); set("sb", po.sb_winner || "");
+  AWARDS.forEach(([a]) => set(`aw:${a}`, (p.awards || {})[a] || ""));
+}
+
+// Acepta un picks.json completo (2 jugadores → pestañas 1 y 2) o de un solo
+// jugador (→ la pestaña activa).
+function importPicks(text) {
+  let data;
+  try { data = JSON.parse(text); } catch (e) { alert("El archivo no es JSON válido"); return; }
+  const players = data && data.players ? Object.values(data.players) : [];
+  if (!players.length) { alert("No encontré jugadores en el archivo"); return; }
+  if (data.season) document.getElementById("season").value = data.season;
+  const targets = players.length === 1 ? [activeTab()] : [0, 1];
+  players.slice(0, 2).forEach((p, k) => applyPlayer(targets[k], p));
+  saveDraft();
+  setStatus(players.length === 1 ? `importado en la pestaña ${targets[0] + 1}` : "importados los dos jugadores");
+}
+
 // ---- borrador en localStorage
 function formState() {
-  const s = { season: document.getElementById("season").value, names: [0, 1].map(i => document.getElementById(`name${i}`).value), colors: [0, 1].map(i => document.getElementById(`color${i}`).value), fields: {} };
+  const s = {
+    season: document.getElementById("season").value,
+    names: [0, 1].map(i => document.getElementById(`name${i}`).value),
+    colors: [0, 1].map(i => document.getElementById(`color${i}`).value),
+    fields: {}, orders: {},
+  };
   document.querySelectorAll(".player select, .player input").forEach(f => { s.fields[`${f.closest(".player").dataset.player}|${f.name}`] = f.value; });
+  document.querySelectorAll(".player").forEach(el => DIVS.forEach(d => { s.orders[`${el.dataset.player}|${d}`] = orderOf(el, d); }));
   return s;
 }
 function saveDraft() {
@@ -233,6 +353,11 @@ function loadDraft() {
     const f = document.querySelector(`.player[data-player="${pi}"] [name="${name}"]`);
     if (f) f.value = v;
   });
+  Object.entries(s.orders || {}).forEach(([k, list]) => {
+    const [pi, d] = k.split("|");
+    const el = document.querySelector(`.player[data-player="${pi}"]`);
+    if (el && DIVS.includes(d)) setOrder(el, d, list);
+  });
   setStatus("borrador restaurado");
 }
 let statusTimer;
@@ -242,6 +367,9 @@ function syncTab(i) {
 }
 
 // ---- init
+if (!Object.keys(T).length) {
+  document.querySelector("main").insertAdjacentHTML("afterbegin", '<div class="warnings">No cargó <code>teams.js</code>. Corre <code>python scripts/gen_teams.py</code>.</div>');
+}
 [0, 1].forEach(renderPlayer);
 loadDraft();
 document.addEventListener("change", saveDraft);
@@ -266,10 +394,19 @@ document.getElementById("copy").addEventListener("click", async () => {
   try { await navigator.clipboard.writeText(lastJson); setStatus("copiado"); }
   catch (e) { document.getElementById("out").select(); document.execCommand("copy"); setStatus("copiado"); }
 });
-document.getElementById("download").addEventListener("click", () => {
-  const blob = new Blob([lastJson + "\n"], { type: "application/json" });
-  const a = Object.assign(document.createElement("a"), { href: URL.createObjectURL(blob), download: "picks.json" });
-  document.body.appendChild(a); a.click(); a.remove();
+document.getElementById("download").addEventListener("click", () => downloadText("picks.json", lastJson));
+document.getElementById("download-one").addEventListener("click", () => {
+  const i = activeTab();
+  const p = readPlayer(i);
+  const id = slug(p.display_name) || `jugador${i + 1}`;
+  showWarnings(validate(p, p.display_name || `Jugador ${i + 1}`));
+  downloadText(`picks-${id}.json`, JSON.stringify({ season: seasonValue(), locked_at: nowIso(), players: { [id]: p } }, null, 2));
+});
+document.getElementById("import").addEventListener("click", () => document.getElementById("import-file").click());
+document.getElementById("import-file").addEventListener("change", async e => {
+  const f = e.target.files[0]; if (!f) return;
+  importPicks(await f.text());
+  e.target.value = "";
 });
 document.getElementById("reset").addEventListener("click", () => {
   if (!confirm("¿Borrar el borrador guardado en este navegador?")) return;

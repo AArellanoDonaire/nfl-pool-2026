@@ -17,14 +17,35 @@ GitHub Actions (cron martes 12:00 UTC)
 
 Todo es estático: `docs/index.html` hace `fetch()` a los JSON del mismo origen.
 
+## Reglas de puntaje
+
+| Acierto | Puntos |
+|---|---|
+| Campeón de división (x8) | 3 |
+| Lugares 2, 3 y 4 de cada división (x24) | 1 c/u |
+| Equipo clasificado a playoffs (x14, el seed no importa) | 2 |
+| Campeón de conferencia (x2) | 4 |
+| Ganador del Super Bowl | 5 |
+| MVP | 3 |
+| OPOY, DPOY, OROY, DROY, CPOY, COY, ACOY, MVP del Super Bowl | 2 c/u |
+
+Máximo teórico: **108**. La tabla vive en `AWARDS` y `POINTS` de
+`scripts/score.py`; los premios también en `AWARDS` de `docs/picks.html`
+(mantener ambos en sincronía).
+
+El puntaje es provisional cada martes: se puntúa como si la temporada
+terminara hoy. El orden de cada división sale del `playoffSeed` de ESPN.
+Campeones, Super Bowl y premios salen de `docs/data/results.json` (manual).
+
 ## Puesta en marcha
 
 1. **Crear el repo en GitHub** (público) y pushear `main`.
 2. **Pages**: Settings → Pages → Source *Deploy from a branch*, branch `main`,
    carpeta `/docs`. No usar el modo "GitHub Actions" (ver spec §1).
-3. **Picks**: abrir `docs/picks.html` (localmente o en Pages), llenar los dos
-   jugadores, *Generar JSON*, descargar y commitear como `docs/data/picks.json`.
-   Hay que hacerlo antes del kickoff.
+3. **Picks**: abrir `docs/picks.html` (localmente o en Pages). Cada jugador
+   puede llenar su pestaña por su cuenta y usar *Descargar solo este jugador*;
+   el otro lo carga con *Importar JSON*. Con los dos completos, *Generar JSON*,
+   descargar y commitear como `docs/data/picks.json`. Antes del kickoff.
 4. **Probar el workflow**: Actions → *weekly-update* → *Run workflow*. Debería
    commitear `docs/data/standings.json` y `scores.json`. Si `picks.json` no
    existe todavía, solo commitea standings y avisa.
@@ -33,7 +54,8 @@ Todo es estático: `docs/index.html` hace `fetch()` a los JSON del mismo origen.
    ```json
    {
      "afc_champion": "KC", "nfc_champion": "PHI", "sb_winner": "PHI",
-     "awards": { "MVP": "Josh Allen", "OPOY": "", "DPOY": "", "OROY": "", "DROY": "", "CPOY": "", "COY": "" }
+     "awards": { "MVP": "Josh Allen", "OPOY": "", "DPOY": "", "OROY": "", "DROY": "",
+                 "CPOY": "", "COY": "", "ACOY": "", "SB_MVP": "" }
    }
    ```
 
@@ -59,12 +81,13 @@ python -m http.server 8765 --directory docs       # http://localhost:8765
 ```
 
 `python scripts/spike_espn.py` vuelve a bajar los fixtures crudos de ESPN.
+`python scripts/gen_teams.py` regenera `docs/teams.js` (logos y colores).
 
 ## Estructura
 
 ```
-docs/            sitio publicado (index.html, picks.html, data/)
-scripts/         espn.py (parser), fetch_standings.py, score.py (lógica pura), notify.py, spike_espn.py
+docs/            sitio publicado (index.html, picks.html, teams.js, data/)
+scripts/         espn.py (parser), fetch_standings.py, score.py (lógica pura), notify.py, gen_teams.py, spike_espn.py
 tests/           tests + fixtures crudos de ESPN (ver tests/fixtures/README.md)
 .github/         weekly.yml (cron martes), ci.yml (tests en cada push)
 ```

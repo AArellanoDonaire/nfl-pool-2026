@@ -5,10 +5,14 @@
     "alfredo": {
       "display_name": "Alfredo",
       "divisions": {
-        "AFC East": "BUF", "AFC North": "BAL",
-        "AFC South": "HOU", "AFC West": "KC",
-        "NFC East": "PHI", "NFC North": "DET",
-        "NFC South": "TB",  "NFC West": "SF"
+        "AFC East":  ["BUF", "MIA", "NE", "NYJ"],
+        "AFC North": ["BAL", "CIN", "PIT", "CLE"],
+        "AFC South": ["HOU", "JAX", "IND", "TEN"],
+        "AFC West":  ["KC", "LAC", "DEN", "LV"],
+        "NFC East":  ["PHI", "WSH", "DAL", "NYG"],
+        "NFC North": ["DET", "MIN", "GB", "CHI"],
+        "NFC South": ["TB", "ATL", "NO", "CAR"],
+        "NFC West":  ["SF", "LAR", "SEA", "ARI"]
       },
       "playoffs": {
         "AFC": ["KC", "BAL", "HOU", "BUF", "LAC", "PIT", "DEN"],
@@ -19,16 +23,20 @@
       },
       "awards": {
         "MVP": "Josh Allen", "OPOY": "Saquon Barkley", "DPOY": "Myles Garrett",
-        "OROY": "", "DROY": "", "CPOY": "", "COY": ""
+        "OROY": "", "DROY": "", "CPOY": "", "COY": "", "ACOY": "", "SB_MVP": ""
       }
     },
     "oraculo": {
       "display_name": "Oráculo",
       "divisions": {
-        "AFC East": "NE",  "AFC North": "PIT",
-        "AFC South": "JAX", "AFC West": "DEN",
-        "NFC East": "PHI", "NFC North": "CHI",
-        "NFC South": "CAR", "NFC West": "SEA"
+        "AFC East":  ["NE", "BUF", "MIA", "NYJ"],
+        "AFC North": ["PIT", "BAL", "CIN", "CLE"],
+        "AFC South": ["JAX", "HOU", "IND", "TEN"],
+        "AFC West":  ["DEN", "LAC", "KC", "LV"],
+        "NFC East":  ["PHI", "DAL", "WSH", "NYG"],
+        "NFC North": ["CHI", "GB", "MIN", "DET"],
+        "NFC South": ["CAR", "TB", "ATL", "NO"],
+        "NFC West":  ["SEA", "LAR", "SF", "ARI"]
       },
       "playoffs": {
         "AFC": ["DEN", "NE", "JAX", "PIT", "HOU", "BUF", "LAC"],
@@ -39,7 +47,7 @@
       },
       "awards": {
         "MVP": "drake maye", "OPOY": "Jonathan Taylor", "DPOY": "Myles Garrett",
-        "OROY": "", "DROY": "", "CPOY": "", "COY": "Mike Vrabel"
+        "OROY": "", "DROY": "", "CPOY": "", "COY": "Mike Vrabel", "ACOY": "", "SB_MVP": ""
       }
     }
   }

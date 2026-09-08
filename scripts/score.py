@@ -2,18 +2,22 @@
 Puntaje del pool. Lógica pura: recibe picks + standings (+ results opcional)
 y devuelve puntajes. Sin I/O salvo en main().
 
-Reglas (spec §4):
-  división acertada        3   (x8)
+Reglas (spec §4, ampliadas):
+  campeón de división      3   (x8)
+  lugares 2, 3 y 4 de la división   1 c/u  (x24)
   equipo en playoffs       2   (x14, el orden del seed no importa)
   campeón de conferencia   4   (x2)
   ganador del Super Bowl   5
   MVP                      3
-  otros premios            2   (x6)
-  máximo teórico          80
+  otros premios            2   (ver AWARDS)
+  máximo teórico           MAX_POINTS (se calcula)
 
 Puntaje provisional: se puntúa como si la temporada terminara hoy.
-  - Líder de división = menor `seed` (>0) de la división. Si nadie tiene
-    seed todavía (pretemporada), la división no reparte puntos.
+  - Orden de la división = por `seed` ascendente (ESPN da seed 1..16 dentro
+    de la conferencia, así que ordena a los 4). Si alguien no tiene seed
+    (pretemporada), la división no reparte puntos.
+  - `picks.divisions[d]` es una lista de 4 en orden; el primero es el campeón.
+    Por compatibilidad se acepta un string (solo campeón).
   - Playoffs = seed 1..7 por conferencia.
   - Campeones / SB / premios salen de `results` (manual), 0 si no están.
 """
@@ -27,14 +31,24 @@ from pathlib import Path
 from typing import Any
 
 POINTS = {
-    "division": 3,
+    "division": 3,      # campeón (lugar 1)
+    "division_place": 1,  # lugares 2, 3 y 4
     "playoff": 2,
     "conf_champion": 4,
     "sb_winner": 5,
-    "MVP": 3,
-    "award": 2,
 }
-AWARDS = ("MVP", "OPOY", "DPOY", "OROY", "DROY", "CPOY", "COY")
+# Premios y puntos. Mantener en sincronía con AWARDS en docs/picks.html.
+AWARDS = {
+    "MVP": 3,
+    "OPOY": 2,   # Offensive Player of the Year
+    "DPOY": 2,   # Defensive Player of the Year
+    "OROY": 2,   # Offensive Rookie of the Year
+    "DROY": 2,   # Defensive Rookie of the Year
+    "CPOY": 2,   # Comeback Player of the Year
+    "COY": 2,    # Coach of the Year
+    "ACOY": 2,   # Assistant Coach of the Year
+    "SB_MVP": 2, # MVP del Super Bowl
+}
 DIVISIONS = (
     "AFC East", "AFC North", "AFC South", "AFC West",
     "NFC East", "NFC North", "NFC South", "NFC West",
@@ -42,26 +56,34 @@ DIVISIONS = (
 CONFERENCES = ("AFC", "NFC")
 PLAYOFF_SPOTS = 7
 MAX_POINTS = (
-    8 * POINTS["division"]
+    8 * (POINTS["division"] + 3 * POINTS["division_place"])
     + 14 * POINTS["playoff"]
     + 2 * POINTS["conf_champion"]
     + POINTS["sb_winner"]
-    + POINTS["MVP"]
-    + 6 * POINTS["award"]
+    + sum(AWARDS.values())
 )
-assert MAX_POINTS == 80
 
 
 # ---------------------------------------------------------------- estado actual
 
 
-def division_leaders(standings: dict[str, Any]) -> dict[str, str | None]:
-    """Líder actual de cada división según `seed`. None si nadie tiene seed."""
+def division_order(standings: dict[str, Any]) -> dict[str, list[str] | None]:
+    """Orden actual (1 a 4) de cada división por `seed`. None si falta algún seed."""
     by_div: dict[str, list[tuple[int, str]]] = {d: [] for d in DIVISIONS}
     for abbr, t in standings["teams"].items():
-        if t["seed"] > 0:
-            by_div[t["division"]].append((t["seed"], abbr))
-    return {d: (min(rows)[1] if rows else None) for d, rows in by_div.items()}
+        by_div[t["division"]].append((t["seed"], abbr))
+    out: dict[str, list[str] | None] = {}
+    for d, rows in by_div.items():
+        if len(rows) == 4 and all(seed > 0 for seed, _ in rows):
+            out[d] = [abbr for _, abbr in sorted(rows)]
+        else:
+            out[d] = None
+    return out
+
+
+def division_leaders(standings: dict[str, Any]) -> dict[str, str | None]:
+    """Líder actual de cada división (primero del orden). None si no hay seeds."""
+    return {d: (order[0] if order else None) for d, order in division_order(standings).items()}
 
 
 def playoff_teams(standings: dict[str, Any]) -> dict[str, list[str]]:
@@ -87,18 +109,23 @@ def score_player(
 ) -> dict[str, Any]:
     """Puntaje de un jugador. Devuelve total, breakdown por categoría y detalle."""
     results = results or {}
-    leaders = division_leaders(standings)
+    orders = division_order(standings)
     playoffs = playoff_teams(standings)
 
-    # Divisiones
+    # Divisiones: lugar 1 vale POINTS["division"], lugares 2-4 POINTS["division_place"]
     div_detail = {}
     div_pts = 0
     for d in DIVISIONS:
-        pick = picks["divisions"].get(d)
-        actual = leaders[d]
-        hit = actual is not None and pick == actual
-        div_pts += POINTS["division"] if hit else 0
-        div_detail[d] = {"pick": pick, "actual": actual, "hit": hit}
+        raw = picks["divisions"].get(d)
+        pick = list(raw) if isinstance(raw, list) else ([raw] if raw else [])
+        actual = orders[d]
+        hits = [actual is not None and k < len(actual) and t == actual[k] for k, t in enumerate(pick)]
+        pts = sum(
+            (POINTS["division"] if k == 0 else POINTS["division_place"]) if h else 0
+            for k, h in enumerate(hits)
+        )
+        div_pts += pts
+        div_detail[d] = {"pick": pick, "actual": actual, "hits": hits, "points": pts}
 
     # Playoffs (solo pertenencia, no orden)
     po_detail = {}
@@ -129,13 +156,12 @@ def score_player(
     aw_detail = {}
     aw_pts = 0
     actual_awards = results.get("awards") or {}
-    for a in AWARDS:
+    for a, pts in AWARDS.items():
         pick = picks.get("awards", {}).get(a) or None
         actual = actual_awards.get(a) or None
         hit = actual is not None and pick is not None and _norm(pick) == _norm(actual)
-        pts = POINTS["MVP"] if a == "MVP" else POINTS["award"]
         aw_pts += pts if hit else 0
-        aw_detail[a] = {"pick": pick, "actual": actual, "hit": hit}
+        aw_detail[a] = {"pick": pick, "actual": actual, "hit": hit, "points": pts if hit else 0}
 
     breakdown = {
         "divisions": div_pts,
@@ -176,10 +202,12 @@ def score_all(
         players[pid] = entry
     return {
         "season": standings.get("season"),
+        "week": standings.get("week"),
         "max_points": MAX_POINTS,
         "players": players,
         "current": {
             "division_leaders": division_leaders(standings),
+            "division_order": division_order(standings),
             "playoff_teams": playoff_teams(standings),
         },
     }
@@ -217,6 +245,7 @@ def main() -> int:
     history.append(
         {
             "computed_at": scores["computed_at"],
+            "week": scores.get("week"),
             "totals": {pid: p["total"] for pid, p in scores["players"].items()},
             "breakdown": {pid: p["breakdown"] for pid, p in scores["players"].items()},
             "current": scores["current"],

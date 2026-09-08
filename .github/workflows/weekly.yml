@@ -40,7 +40,8 @@ jobs:
           git config user.name "nfl-pool-bot"
           git config user.email "actions@github.com"
           git add docs/data/
-          git diff --staged --quiet || git commit -m "standings $(date -u +%F) (week $(date -u +%V))"
+          WEEK=$(python -c "import json; w=json.load(open('docs/data/standings.json')).get('week'); print(f'semana {w}' if w else 'sin semana')")
+          git diff --staged --quiet || git commit -m "standings $(date -u +%F) ($WEEK)"
           git push
 
       - name: notify (Telegram)
