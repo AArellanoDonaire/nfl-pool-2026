@@ -94,6 +94,15 @@ def test_score_all_shape(picks_2025, standings_2025, results_2025):
     assert out["max_points"] == 80
     assert set(out["players"]) == {"alfredo", "oraculo"}
     assert out["players"]["oraculo"]["display_name"] == "Oráculo"
+    assert "color" not in out["players"]["oraculo"]
+
+
+def test_color_passthrough(picks_2025, standings_2025):
+    import copy
+    picks = copy.deepcopy(picks_2025)
+    picks["players"]["alfredo"]["color"] = "#9085e9"
+    out = score_all(picks, standings_2025)
+    assert out["players"]["alfredo"]["color"] == "#9085e9"
     assert out["current"]["division_leaders"] == LEADERS_2025
     assert out["current"]["playoff_teams"] == PLAYOFFS_2025
 

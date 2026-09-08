@@ -22,6 +22,8 @@
     font: inherit; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--ink); min-width: 0;
   }
   select:invalid { color: var(--muted); }
+  .namecolor { display: flex; gap: 6px; align-items: center; }
+  input[type=color] { width: 40px; height: 38px; padding: 2px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); cursor: pointer; }
   .tabs { display: flex; gap: 8px; margin: 24px 0 0; border-bottom: 2px solid var(--line); }
   .tabs button { font: inherit; font-weight: 600; padding: 10px 18px; border: 0; background: none; color: var(--ink2); border-bottom: 3px solid transparent; margin-bottom: -2px; cursor: pointer; }
   .tabs button.active { color: var(--accent); border-color: var(--accent); }
@@ -50,12 +52,12 @@
 <body>
 <main>
   <h1>NFL Pool 2026 · Picks</h1>
-  <p class="hint">Se usa una vez. Llená los dos jugadores, generá el JSON y commitealo como <code>docs/data/picks.json</code>. El borrador se guarda solo en este navegador.</p>
+  <p class="hint">Se usa una vez. Llená los dos jugadores, generá el JSON y commitealo como <code>docs/data/picks.json</code>. El borrador se guarda solo en este navegador. El color de cada jugador es el que usa el leaderboard.</p>
 
   <div class="top">
     <label>Temporada <input type="number" id="season" value="2026" min="2020" max="2100" style="width:100px"></label>
-    <label>Jugador 1 <input type="text" id="name0" placeholder="Nombre" value="Alfredo"></label>
-    <label>Jugador 2 <input type="text" id="name1" placeholder="Nombre" value=""></label>
+    <label>Jugador 1 <span class="namecolor"><input type="text" id="name0" placeholder="Nombre" value="Alfredo"><input type="color" id="color0" value="#9085e9" title="Color en el leaderboard"></span></label>
+    <label>Jugador 2 <span class="namecolor"><input type="text" id="name1" placeholder="Nombre" value=""><input type="color" id="color1" value="#e66767" title="Color en el leaderboard"></span></label>
     <span class="status" id="status"></span>
   </div>
 
@@ -156,7 +158,7 @@ function readPlayer(i) {
   playoffs.nfc_champion = v("champ:NFC");
   playoffs.sb_winner = v("sb");
   const awards = Object.fromEntries(AWARDS.map(([a]) => [a, v(`aw:${a}`).trim()]));
-  return { display_name: document.getElementById(`name${i}`).value.trim(), divisions, playoffs, awards };
+  return { display_name: document.getElementById(`name${i}`).value.trim(), color: document.getElementById(`color${i}`).value, divisions, playoffs, awards };
 }
 
 function validate(p, label) {
@@ -213,7 +215,7 @@ function showWarnings(list) {
 
 // ---- borrador en localStorage
 function formState() {
-  const s = { season: document.getElementById("season").value, names: [0, 1].map(i => document.getElementById(`name${i}`).value), fields: {} };
+  const s = { season: document.getElementById("season").value, names: [0, 1].map(i => document.getElementById(`name${i}`).value), colors: [0, 1].map(i => document.getElementById(`color${i}`).value), fields: {} };
   document.querySelectorAll(".player select, .player input").forEach(f => { s.fields[`${f.closest(".player").dataset.player}|${f.name}`] = f.value; });
   return s;
 }
@@ -225,6 +227,7 @@ function loadDraft() {
   if (!s) return;
   if (s.season) document.getElementById("season").value = s.season;
   (s.names || []).forEach((n, i) => { document.getElementById(`name${i}`).value = n; syncTab(i); });
+  (s.colors || []).forEach((c, i) => { if (c) document.getElementById(`color${i}`).value = c; });
   Object.entries(s.fields || {}).forEach(([k, v]) => {
     const [pi, name] = k.split("|");
     const f = document.querySelector(`.player[data-player="${pi}"] [name="${name}"]`);

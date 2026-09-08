@@ -8,8 +8,7 @@
   :root {
     --page: #0d0d0d; --surface: #1a1a19; --ink: #ffffff; --ink2: #c3c2b7; --muted: #898781;
     --grid: #2c2c2a; --axis: #383835;
-    --p1: #3987e5; --p2: #d95926;
-    --up: #0ca30c; --down: #e66767;
+    --up: #0ca30c; --down: #d03b3b;   /* colores de jugador: DEFAULT_COLORS en el script, o "color" en picks.json */
   }
   * { box-sizing: border-box; }
   html, body { height: 100%; }
@@ -77,7 +76,8 @@
 </div>
 
 <script>
-const COLORS = ["var(--p1)", "var(--p2)"];
+const DEFAULT_COLORS = ["#9085e9", "#e66767"];
+const HEX = /^#[0-9a-f]{6}$/i;
 const CATS = [["divisions","Div"],["playoffs","Playoffs"],["conf_champions","Conf"],["sb_winner","SB"],["awards","Premios"]];
 const bust = url => `${url}?v=${Date.now()}`;   // Pages cachea: cache-busting obligatorio
 
@@ -107,7 +107,11 @@ function main(scores, history) {
     return;
   }
   const ids = Object.keys(scores.players);
-  const players = ids.map((id, i) => ({ id, i, color: COLORS[i], ...scores.players[id] }));
+  const players = ids.map((id, i) => {
+    const p = scores.players[id];
+    const color = HEX.test(p.color || "") ? p.color : DEFAULT_COLORS[i % DEFAULT_COLORS.length];
+    return { id, i, ...p, color };
+  });
   const snaps = byDay(history || []);
   const today = day(scores.computed_at);
   const prev = [...snaps].reverse().find(h => day(h.computed_at) < today) || null;
@@ -201,9 +205,8 @@ function drawChart(players, snaps, max) {
   });
 
   // series: línea 2px, marcador ≥8px con anillo de superficie, etiqueta directa al final
-  const raw = { "var(--p1)": "#3987e5", "var(--p2)": "#d95926" };
   players.forEach(p => {
-    const col = raw[p.color] || p.color;
+    const col = p.color;
     const pts = snaps.map((h, i) => [x(i), y(h.totals[p.id] ?? 0)]);
     svg.appendChild(el("path", { d: pts.map((q, i) => (i ? "L" : "M") + q[0] + " " + q[1]).join(" "), fill: "none", stroke: col, "stroke-width": 2, "stroke-linejoin": "round" }));
     pts.forEach(q => svg.appendChild(el("circle", { cx: q[0], cy: q[1], r: 4.5, fill: col, stroke: "#1a1a19", "stroke-width": 2 })));

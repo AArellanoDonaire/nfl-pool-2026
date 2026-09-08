@@ -167,10 +167,13 @@ def score_all(
     results: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Puntaje de todos los jugadores de picks.json + estado actual de la liga."""
-    players = {
-        pid: {"display_name": p.get("display_name", pid), **score_player(p, standings, results)}
-        for pid, p in picks_file["players"].items()
-    }
+    players = {}
+    for pid, p in picks_file["players"].items():
+        entry = {"display_name": p.get("display_name", pid)}
+        if p.get("color"):
+            entry["color"] = p["color"]  # opcional, hex; lo usa index.html
+        entry.update(score_player(p, standings, results))
+        players[pid] = entry
     return {
         "season": standings.get("season"),
         "max_points": MAX_POINTS,
