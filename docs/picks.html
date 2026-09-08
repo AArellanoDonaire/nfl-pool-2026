@@ -175,7 +175,7 @@ function renderPlayer(i) {
     <p class="hint">Toca los equipos de cada división en orden: el primero que toques es tu campeón, el segundo queda 2°, y así. Después puedes arrastrar o usar las flechas para ajustar.</p>
     <div class="grid4">${divsHtml}</div>
     <h2>Playoffs <span class="status">2 pts por clasificado · 4 por campeón de conferencia</span></h2>
-    <p class="hint">Los seeds 1–4 son tus campeones de división (se llenan solos; elige el orden). Los seeds 5–7 son los wild cards. El orden del seed no da puntos.</p>
+    <p class="hint">Los seeds 1–4 son tus campeones de división (se llenan solos). Para cambiar el orden, elige en un seed el equipo que está en otro: se intercambian. Los seeds 5–7 son los wild cards. El orden del seed no da puntos.</p>
     <div class="grid2">${poHtml}</div>
     <div class="row" style="max-width:420px;margin-top:10px"><span class="lbl">Super Bowl <small class="status">5 pts</small></span>
       <select name="sb" required></select></div>
@@ -271,10 +271,12 @@ function setOrder(el, d, list) {
 
 // ------------------------------------------------------------ playoffs dependientes
 
-function setOptions(sel, teams, placeholder, disabledSet = new Set()) {
+// `where` = {equipo: "#3"}: marca en qué seed está cada equipo ya usado.
+// No se deshabilitan: elegir uno usado intercambia (ver handler de change).
+function setOptions(sel, teams, placeholder, where = {}) {
   const cur = sel.value;
   sel.innerHTML = `<option value="" disabled ${cur && teams.includes(cur) ? "" : "selected"}>${placeholder}</option>` +
-    teams.map(a => `<option value="${a}" ${disabledSet.has(a) && a !== cur ? "disabled" : ""}>${label(a)}</option>`).join("");
+    teams.map(a => `<option value="${a}">${label(a)}${where[a] && a !== cur ? ` · ahora ${where[a]}` : ""}</option>`).join("");
   sel.value = teams.includes(cur) ? cur : "";
   sel.dataset.prev = sel.value;
 }
@@ -300,8 +302,9 @@ function refreshPlayoffs(el) {
     });
     SEEDS.forEach(s => {
       const sel = seedSel(s);
-      const taken = new Set(SEEDS.filter(o => o !== s).map(o => seedSel(o).value).filter(Boolean));
-      setOptions(sel, poolOf(s), placeholderOf(s), taken);
+      const where = {};
+      SEEDS.filter(o => o !== s).forEach(o => { if (seedSel(o).value) where[seedSel(o).value] = `#${o}`; });
+      setOptions(sel, poolOf(s), placeholderOf(s), where);
       sel.disabled = poolOf(s).length === 0;
     });
     // campeón de conferencia: solo tus 7
