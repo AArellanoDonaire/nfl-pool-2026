@@ -52,7 +52,7 @@
 <body>
 <main>
   <h1>NFL Pool 2026 · Picks</h1>
-  <p class="hint">Se usa una vez. Llená los dos jugadores, generá el JSON y commitealo como <code>docs/data/picks.json</code>. El borrador se guarda solo en este navegador. El color de cada jugador es el que usa el leaderboard.</p>
+  <p class="hint">Se usa una vez. Llena los dos jugadores, genera el JSON y commitéalo como <code>docs/data/picks.json</code>. El borrador se guarda solo en este navegador. El color de cada jugador es el que usa el leaderboard.</p>
 
   <div class="top">
     <label>Temporada <input type="number" id="season" value="2026" min="2020" max="2100" style="width:100px"></label>
@@ -125,7 +125,7 @@ function renderPlayer(i) {
     <h2>Divisiones <span class="status">3 pts c/u</span></h2>
     <div class="grid2">${divsHtml}</div>
     <h2>Playoffs <span class="status">2 pts por clasificado · 4 por campeón de conferencia</span></h2>
-    <p class="hint">El orden del seed no da puntos, pero dejalo consistente: seeds 1–4 son los campeones de división.</p>
+    <p class="hint">El orden del seed no da puntos, pero déjalo consistente: seeds 1–4 son los campeones de división.</p>
     <div class="grid2">${poHtml}</div>
     <div class="row" style="max-width:420px;margin-top:10px"><span class="lbl">Super Bowl <small class="status">5 pts</small></span>
       <select name="sb" required>${opts([...confTeams("AFC"), ...confTeams("NFC")], "Ganador del Super Bowl")}</select></div>
@@ -209,7 +209,7 @@ function build() {
 function showWarnings(list) {
   const box = document.getElementById("warnings");
   box.innerHTML = list.length
-    ? `<div class="warnings"><strong>Revisá antes de commitear:</strong><ul>${list.map(w => `<li>${w}</li>`).join("")}</ul></div>`
+    ? `<div class="warnings"><strong>Revisa antes de commitear:</strong><ul>${list.map(w => `<li>${w}</li>`).join("")}</ul></div>`
     : `<div class="ok">✓ Sin observaciones. Listo para commitear.</div>`;
 }
 

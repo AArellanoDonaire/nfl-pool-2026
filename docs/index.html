@@ -103,7 +103,7 @@ function main(scores, history) {
   const app = document.getElementById("app");
   if (!scores) {
     document.getElementById("meta").textContent = "sin datos todavía";
-    app.insertAdjacentHTML("beforeend", `<div id="err">Falta <code>data/scores.json</code>. Corré el workflow (workflow_dispatch) o <code>python scripts/fetch_standings.py && python scripts/score.py</code>.</div>`);
+    app.insertAdjacentHTML("beforeend", `<div id="err">Falta <code>data/scores.json</code>. Corre el workflow (workflow_dispatch) o <code>python scripts/fetch_standings.py && python scripts/score.py</code>.</div>`);
     return;
   }
   const ids = Object.keys(scores.players);
