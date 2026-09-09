@@ -11,16 +11,17 @@
     --up: #0ca30c; --down: #d03b3b;   /* colores de jugador: DEFAULT_COLORS en el script, o "color" en picks.json */
   }
   * { box-sizing: border-box; }
-  html, body { height: 100%; }
+  html { height: 100%; }
   body {
     margin: 0; background: var(--page); color: var(--ink);
     font: 16px/1.3 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
     font-variant-numeric: tabular-nums;
   }
+  /* Cabe en 16:9 sin scroll; en pantallas más bajas crece y se puede bajar. */
   #app {
-    height: 100vh; padding: 1.4vh 1.6vw; display: grid; gap: 1.4vh;
-    grid-template-rows: auto auto 1fr auto;
-    grid-template-columns: 1.25fr 1fr;
+    min-height: 100vh; padding: 1.4vh 1.6vw; display: grid; gap: 1.4vh;
+    grid-template-rows: auto auto minmax(0, 1fr) auto;
+    grid-template-columns: 1.35fr 1fr;
     grid-template-areas: "hdr hdr" "cards cards" "divs playoffs" "chart chart";
   }
   header { grid-area: hdr; display: flex; align-items: baseline; gap: 1.2em; }
@@ -37,7 +38,7 @@
   .card .bd { grid-column: 1 / -1; display: flex; gap: 1.6vw; color: var(--ink2); font-size: 1.9vh; flex-wrap: wrap; }
   .card .bd b { color: var(--ink); }
 
-  .panel { background: var(--surface); border-radius: 1.2vh; padding: 1.2vh 1.4vw; min-height: 0; overflow: hidden; display: flex; flex-direction: column; }
+  .panel { background: var(--surface); border-radius: 1.2vh; padding: 1.2vh 1.4vw; min-height: 0; overflow: visible; display: flex; flex-direction: column; }
   .panel h2 { margin: 0 0 .8vh; font-size: 2vh; color: var(--ink2); text-transform: uppercase; letter-spacing: .06em; font-weight: 600; }
   .panel h2 span.sub { color: var(--muted); text-transform: none; letter-spacing: 0; font-weight: 500; }
   #divs { grid-area: divs; } #playoffs { grid-area: playoffs; }
@@ -54,11 +55,12 @@
   .po table td:first-child { color: var(--muted); width: 3vw; }
 
   /* tablero por división: 4 chips por celda */
-  #divs td { padding: .3vh .5vw; }
-  #divs td.dname { color: var(--ink2); font-size: 1.9vh; }
-  .chips { display: inline-flex; gap: .35vw; align-items: center; }
-  .chip { display: inline-flex; align-items: center; gap: .25vw; padding: .2vh .45vw .2vh .3vw; border-radius: .7vh; background: #111; border: 1px solid var(--grid); font-size: 1.85vh; font-weight: 600; line-height: 1; border-left: .35vw solid var(--tc); }
-  .chip img { width: 2.6vh; height: 2.6vh; object-fit: contain; }
+  #divs td { padding: .3vh .5vw; white-space: normal; }
+  #divs td.actual { white-space: nowrap; }
+  #divs td.dname { color: var(--ink2); font-size: 1.9vh; white-space: nowrap; }
+  .chips { display: inline-flex; gap: .3vw; align-items: center; flex-wrap: wrap; row-gap: .3vh; }
+  .chip { display: inline-flex; align-items: center; gap: .2vw; padding: .2vh .4vw .2vh .25vw; border-radius: .7vh; background: #111; border: 1px solid var(--grid); font-size: 1.8vh; font-weight: 600; line-height: 1; border-left: .3vw solid var(--tc); white-space: nowrap; }
+  .chip img { width: 2.4vh; height: 2.4vh; object-fit: contain; }
   .chip.hit { border-color: var(--up); box-shadow: 0 0 0 1px var(--up) inset; }
   .chip.miss { color: var(--muted); opacity: .75; }
   .chip.miss img { filter: grayscale(1); opacity: .6; }
@@ -67,7 +69,7 @@
   .dpts { display: inline-block; min-width: 2.4vh; margin-left: .5vw; padding: .15vh .4vw; border-radius: .6vh; font-size: 1.7vh; font-weight: 700; text-align: center; color: var(--ink); background: var(--grid); vertical-align: middle; }
   .dpts.zero { color: var(--muted); }
 
-  #chart { grid-area: chart; height: 24vh; }
+  #chart { grid-area: chart; height: 24vh; min-height: 180px; }
   #chart .wrap { flex: 1; position: relative; min-height: 0; }
   #chart svg { width: 100%; height: 100%; display: block; overflow: visible; }
   .legend { display: flex; gap: 2vw; font-size: 1.8vh; color: var(--ink2); margin-left: auto; }
@@ -171,8 +173,8 @@ function main(scores, history) {
     <table><thead><tr><th>División</th><th>Actual</th>${heads}</tr></thead><tbody>
     ${divs.map(d => {
       const actual = order[d];
-      const actualCell = actual ? `<span class="chips">${actual.map(t => chip(t, "")).join("")}</span>` : `<span class="na">— sin seeds todavía</span>`;
-      return `<tr><td class="dname">${d}</td><td>${actualCell}</td>
+      const actualCell = actual ? `<span class="chips">${actual.map(t => chip(t, "")).join("")}</span>` : `<span class="na" title="ESPN todavía no entrega seeds">—</span>`;
+      return `<tr><td class="dname">${d}</td><td class="actual">${actualCell}</td>
         ${players.map(p => {
           const det = p.details.divisions[d];
           if (!det || !det.pick || !det.pick.length) return `<td class="na">—</td>`;
@@ -238,14 +240,22 @@ function drawChart(players, snaps, max) {
       svg.appendChild(el("text", { x: x(i), y: H - 4, fill: "#898781", "font-size": 12, "text-anchor": "middle" }, snapLabel(h)));
   });
 
+  // etiquetas directas al final: si dos quedan a menos de 15px, se separan
+  const labelY = players.map(p => y(snaps[n - 1].totals[p.id] ?? 0));
+  const order = [...labelY.keys()].sort((a, b) => labelY[a] - labelY[b]);
+  for (let k = 1; k < order.length; k++) {
+    const prev = order[k - 1], cur = order[k];
+    if (labelY[cur] - labelY[prev] < 15) labelY[cur] = labelY[prev] + 15;
+  }
+
   // series: línea 2px, marcador ≥8px con anillo de superficie, etiqueta directa al final
-  players.forEach(p => {
+  players.forEach((p, k) => {
     const col = p.color;
     const pts = snaps.map((h, i) => [x(i), y(h.totals[p.id] ?? 0)]);
     svg.appendChild(el("path", { d: pts.map((q, i) => (i ? "L" : "M") + q[0] + " " + q[1]).join(" "), fill: "none", stroke: col, "stroke-width": 2, "stroke-linejoin": "round" }));
     pts.forEach(q => svg.appendChild(el("circle", { cx: q[0], cy: q[1], r: 4.5, fill: col, stroke: "#1a1a19", "stroke-width": 2 })));
     const last = pts[pts.length - 1];
-    svg.appendChild(el("text", { x: last[0] + 10, y: last[1] + 4, fill: "#c3c2b7", "font-size": 13, "font-weight": 600 }, `${p.display_name} ${snaps[n - 1].totals[p.id]}`));
+    svg.appendChild(el("text", { x: last[0] + 10, y: labelY[k] + 4, fill: "#c3c2b7", "font-size": 13, "font-weight": 600 }, `${p.display_name} ${snaps[n - 1].totals[p.id]}`));
   });
 
   // hover: crosshair + tooltip
