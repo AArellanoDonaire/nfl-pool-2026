@@ -1,0 +1,182 @@
+{
+  "season": 2026,
+  "locked_at": "2026-09-09T23:01:11Z",
+  "players": {
+    "alfredo": {
+      "display_name": "Alfredo",
+      "color": "#4900a3",
+      "divisions": {
+        "AFC East": [
+          "BUF",
+          "NE",
+          "NYJ",
+          "MIA"
+        ],
+        "AFC North": [
+          "BAL",
+          "CIN",
+          "PIT",
+          "CLE"
+        ],
+        "AFC South": [
+          "HOU",
+          "JAX",
+          "IND",
+          "TEN"
+        ],
+        "AFC West": [
+          "DEN",
+          "LAC",
+          "KC",
+          "LV"
+        ],
+        "NFC East": [
+          "PHI",
+          "NYG",
+          "DAL",
+          "WSH"
+        ],
+        "NFC North": [
+          "CHI",
+          "GB",
+          "DET",
+          "MIN"
+        ],
+        "NFC South": [
+          "NO",
+          "CAR",
+          "TB",
+          "ATL"
+        ],
+        "NFC West": [
+          "LAR",
+          "SEA",
+          "SF",
+          "ARI"
+        ]
+      },
+      "playoffs": {
+        "AFC": [
+          "BAL",
+          "DEN",
+          "HOU",
+          "BUF",
+          "NE",
+          "CIN",
+          "LAC"
+        ],
+        "NFC": [
+          "LAR",
+          "CHI",
+          "PHI",
+          "NO",
+          "SEA",
+          "GB",
+          "NYG"
+        ],
+        "afc_champion": "BAL",
+        "nfc_champion": "LAR",
+        "sb_winner": "BAL"
+      },
+      "awards": {
+        "MVP": "Lamar Jackson",
+        "OPOY": "Ja'Marr Chase",
+        "DPOY": "Myles Garrett",
+        "OROY": "Ja'Kobi Lane",
+        "DROY": "Caleb Downs",
+        "CPOY": "Micah Parsons",
+        "COY": "Jesse Minter",
+        "ACOY": "Declan Doyle",
+        "SB_MVP": "Derrick Henry"
+      }
+    },
+    "felipe": {
+      "display_name": "Felipe",
+      "color": "#e30202",
+      "divisions": {
+        "AFC East": [
+          "BUF",
+          "NE",
+          "MIA",
+          "NYJ"
+        ],
+        "AFC North": [
+          "BAL",
+          "CIN",
+          "PIT",
+          "CLE"
+        ],
+        "AFC South": [
+          "HOU",
+          "JAX",
+          "TEN",
+          "IND"
+        ],
+        "AFC West": [
+          "DEN",
+          "KC",
+          "LAC",
+          "LV"
+        ],
+        "NFC East": [
+          "DAL",
+          "NYG",
+          "PHI",
+          "WSH"
+        ],
+        "NFC North": [
+          "CHI",
+          "DET",
+          "GB",
+          "MIN"
+        ],
+        "NFC South": [
+          "TB",
+          "CAR",
+          "NO",
+          "ATL"
+        ],
+        "NFC West": [
+          "LAR",
+          "SEA",
+          "SF",
+          "ARI"
+        ]
+      },
+      "playoffs": {
+        "AFC": [
+          "BUF",
+          "BAL",
+          "HOU",
+          "DEN",
+          "LAC",
+          "CIN",
+          "KC"
+        ],
+        "NFC": [
+          "DAL",
+          "CHI",
+          "TB",
+          "LAR",
+          "SEA",
+          "NYG",
+          "DET"
+        ],
+        "afc_champion": "BAL",
+        "nfc_champion": "CHI",
+        "sb_winner": "BAL"
+      },
+      "awards": {
+        "MVP": "Joe Burrow",
+        "OPOY": "Jahmyr Gibbs",
+        "DPOY": "Myles Garrett",
+        "OROY": "Jerimiyah Love",
+        "DROY": "Rueben Bain",
+        "CPOY": "Patrick Mahomes",
+        "COY": "Ben Johnson",
+        "ACOY": "Mike McDaniel",
+        "SB_MVP": "Lamar Jackson"
+      }
+    }
+  }
+}
