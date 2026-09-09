@@ -1,0 +1,52 @@
+[
+  {
+    "computed_at": "2026-09-09T23:02:46+00:00",
+    "week": 1,
+    "totals": {
+      "alfredo": 0,
+      "felipe": 0
+    },
+    "breakdown": {
+      "alfredo": {
+        "divisions": 0,
+        "playoffs": 0,
+        "conf_champions": 0,
+        "sb_winner": 0,
+        "awards": 0
+      },
+      "felipe": {
+        "divisions": 0,
+        "playoffs": 0,
+        "conf_champions": 0,
+        "sb_winner": 0,
+        "awards": 0
+      }
+    },
+    "current": {
+      "division_leaders": {
+        "AFC East": null,
+        "AFC North": null,
+        "AFC South": null,
+        "AFC West": null,
+        "NFC East": null,
+        "NFC North": null,
+        "NFC South": null,
+        "NFC West": null
+      },
+      "division_order": {
+        "AFC East": null,
+        "AFC North": null,
+        "AFC South": null,
+        "AFC West": null,
+        "NFC East": null,
+        "NFC North": null,
+        "NFC South": null,
+        "NFC West": null
+      },
+      "playoff_teams": {
+        "AFC": [],
+        "NFC": []
+      }
+    }
+  }
+]

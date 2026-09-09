@@ -1,0 +1,525 @@
+{
+  "season": 2026,
+  "week": 1,
+  "max_points": 108,
+  "players": {
+    "alfredo": {
+      "display_name": "Alfredo",
+      "color": "#4900a3",
+      "total": 0,
+      "breakdown": {
+        "divisions": 0,
+        "playoffs": 0,
+        "conf_champions": 0,
+        "sb_winner": 0,
+        "awards": 0
+      },
+      "details": {
+        "divisions": {
+          "AFC East": {
+            "pick": [
+              "BUF",
+              "NE",
+              "NYJ",
+              "MIA"
+            ],
+            "actual": null,
+            "hits": [
+              false,
+              false,
+              false,
+              false
+            ],
+            "points": 0
+          },
+          "AFC North": {
+            "pick": [
+              "BAL",
+              "CIN",
+              "PIT",
+              "CLE"
+            ],
+            "actual": null,
+            "hits": [
+              false,
+              false,
+              false,
+              false
+            ],
+            "points": 0
+          },
+          "AFC South": {
+            "pick": [
+              "HOU",
+              "JAX",
+              "IND",
+              "TEN"
+            ],
+            "actual": null,
+            "hits": [
+              false,
+              false,
+              false,
+              false
+            ],
+            "points": 0
+          },
+          "AFC West": {
+            "pick": [
+              "DEN",
+              "LAC",
+              "KC",
+              "LV"
+            ],
+            "actual": null,
+            "hits": [
+              false,
+              false,
+              false,
+              false
+            ],
+            "points": 0
+          },
+          "NFC East": {
+            "pick": [
+              "PHI",
+              "NYG",
+              "DAL",
+              "WSH"
+            ],
+            "actual": null,
+            "hits": [
+              false,
+              false,
+              false,
+              false
+            ],
+            "points": 0
+          },
+          "NFC North": {
+            "pick": [
+              "CHI",
+              "GB",
+              "DET",
+              "MIN"
+            ],
+            "actual": null,
+            "hits": [
+              false,
+              false,
+              false,
+              false
+            ],
+            "points": 0
+          },
+          "NFC South": {
+            "pick": [
+              "NO",
+              "CAR",
+              "TB",
+              "ATL"
+            ],
+            "actual": null,
+            "hits": [
+              false,
+              false,
+              false,
+              false
+            ],
+            "points": 0
+          },
+          "NFC West": {
+            "pick": [
+              "LAR",
+              "SEA",
+              "SF",
+              "ARI"
+            ],
+            "actual": null,
+            "hits": [
+              false,
+              false,
+              false,
+              false
+            ],
+            "points": 0
+          }
+        },
+        "playoffs": {
+          "AFC": {
+            "pick": [
+              "BAL",
+              "DEN",
+              "HOU",
+              "BUF",
+              "NE",
+              "CIN",
+              "LAC"
+            ],
+            "actual": [],
+            "hits": []
+          },
+          "NFC": {
+            "pick": [
+              "LAR",
+              "CHI",
+              "PHI",
+              "NO",
+              "SEA",
+              "GB",
+              "NYG"
+            ],
+            "actual": [],
+            "hits": []
+          }
+        },
+        "conf_champions": {
+          "AFC": {
+            "pick": "BAL",
+            "actual": null,
+            "hit": false
+          },
+          "NFC": {
+            "pick": "LAR",
+            "actual": null,
+            "hit": false
+          }
+        },
+        "sb_winner": {
+          "pick": "BAL",
+          "actual": null,
+          "hit": false
+        },
+        "awards": {
+          "MVP": {
+            "pick": "Lamar Jackson",
+            "actual": null,
+            "hit": false,
+            "points": 0
+          },
+          "OPOY": {
+            "pick": "Ja'Marr Chase",
+            "actual": null,
+            "hit": false,
+            "points": 0
+          },
+          "DPOY": {
+            "pick": "Myles Garrett",
+            "actual": null,
+            "hit": false,
+            "points": 0
+          },
+          "OROY": {
+            "pick": "Ja'Kobi Lane",
+            "actual": null,
+            "hit": false,
+            "points": 0
+          },
+          "DROY": {
+            "pick": "Caleb Downs",
+            "actual": null,
+            "hit": false,
+            "points": 0
+          },
+          "CPOY": {
+            "pick": "Micah Parsons",
+            "actual": null,
+            "hit": false,
+            "points": 0
+          },
+          "COY": {
+            "pick": "Jesse Minter",
+            "actual": null,
+            "hit": false,
+            "points": 0
+          },
+          "ACOY": {
+            "pick": "Declan Doyle",
+            "actual": null,
+            "hit": false,
+            "points": 0
+          },
+          "SB_MVP": {
+            "pick": "Derrick Henry",
+            "actual": null,
+            "hit": false,
+            "points": 0
+          }
+        }
+      }
+    },
+    "felipe": {
+      "display_name": "Felipe",
+      "color": "#e30202",
+      "total": 0,
+      "breakdown": {
+        "divisions": 0,
+        "playoffs": 0,
+        "conf_champions": 0,
+        "sb_winner": 0,
+        "awards": 0
+      },
+      "details": {
+        "divisions": {
+          "AFC East": {
+            "pick": [
+              "BUF",
+              "NE",
+              "MIA",
+              "NYJ"
+            ],
+            "actual": null,
+            "hits": [
+              false,
+              false,
+              false,
+              false
+            ],
+            "points": 0
+          },
+          "AFC North": {
+            "pick": [
+              "BAL",
+              "CIN",
+              "PIT",
+              "CLE"
+            ],
+            "actual": null,
+            "hits": [
+              false,
+              false,
+              false,
+              false
+            ],
+            "points": 0
+          },
+          "AFC South": {
+            "pick": [
+              "HOU",
+              "JAX",
+              "TEN",
+              "IND"
+            ],
+            "actual": null,
+            "hits": [
+              false,
+              false,
+              false,
+              false
+            ],
+            "points": 0
+          },
+          "AFC West": {
+            "pick": [
+              "DEN",
+              "KC",
+              "LAC",
+              "LV"
+            ],
+            "actual": null,
+            "hits": [
+              false,
+              false,
+              false,
+              false
+            ],
+            "points": 0
+          },
+          "NFC East": {
+            "pick": [
+              "DAL",
+              "NYG",
+              "PHI",
+              "WSH"
+            ],
+            "actual": null,
+            "hits": [
+              false,
+              false,
+              false,
+              false
+            ],
+            "points": 0
+          },
+          "NFC North": {
+            "pick": [
+              "CHI",
+              "DET",
+              "GB",
+              "MIN"
+            ],
+            "actual": null,
+            "hits": [
+              false,
+              false,
+              false,
+              false
+            ],
+            "points": 0
+          },
+          "NFC South": {
+            "pick": [
+              "TB",
+              "CAR",
+              "NO",
+              "ATL"
+            ],
+            "actual": null,
+            "hits": [
+              false,
+              false,
+              false,
+              false
+            ],
+            "points": 0
+          },
+          "NFC West": {
+            "pick": [
+              "LAR",
+              "SEA",
+              "SF",
+              "ARI"
+            ],
+            "actual": null,
+            "hits": [
+              false,
+              false,
+              false,
+              false
+            ],
+            "points": 0
+          }
+        },
+        "playoffs": {
+          "AFC": {
+            "pick": [
+              "BUF",
+              "BAL",
+              "HOU",
+              "DEN",
+              "LAC",
+              "CIN",
+              "KC"
+            ],
+            "actual": [],
+            "hits": []
+          },
+          "NFC": {
+            "pick": [
+              "DAL",
+              "CHI",
+              "TB",
+              "LAR",
+              "SEA",
+              "NYG",
+              "DET"
+            ],
+            "actual": [],
+            "hits": []
+          }
+        },
+        "conf_champions": {
+          "AFC": {
+            "pick": "BAL",
+            "actual": null,
+            "hit": false
+          },
+          "NFC": {
+            "pick": "CHI",
+            "actual": null,
+            "hit": false
+          }
+        },
+        "sb_winner": {
+          "pick": "BAL",
+          "actual": null,
+          "hit": false
+        },
+        "awards": {
+          "MVP": {
+            "pick": "Joe Burrow",
+            "actual": null,
+            "hit": false,
+            "points": 0
+          },
+          "OPOY": {
+            "pick": "Jahmyr Gibbs",
+            "actual": null,
+            "hit": false,
+            "points": 0
+          },
+          "DPOY": {
+            "pick": "Myles Garrett",
+            "actual": null,
+            "hit": false,
+            "points": 0
+          },
+          "OROY": {
+            "pick": "Jerimiyah Love",
+            "actual": null,
+            "hit": false,
+            "points": 0
+          },
+          "DROY": {
+            "pick": "Rueben Bain",
+            "actual": null,
+            "hit": false,
+            "points": 0
+          },
+          "CPOY": {
+            "pick": "Patrick Mahomes",
+            "actual": null,
+            "hit": false,
+            "points": 0
+          },
+          "COY": {
+            "pick": "Ben Johnson",
+            "actual": null,
+            "hit": false,
+            "points": 0
+          },
+          "ACOY": {
+            "pick": "Mike McDaniel",
+            "actual": null,
+            "hit": false,
+            "points": 0
+          },
+          "SB_MVP": {
+            "pick": "Lamar Jackson",
+            "actual": null,
+            "hit": false,
+            "points": 0
+          }
+        }
+      }
+    }
+  },
+  "current": {
+    "division_leaders": {
+      "AFC East": null,
+      "AFC North": null,
+      "AFC South": null,
+      "AFC West": null,
+      "NFC East": null,
+      "NFC North": null,
+      "NFC South": null,
+      "NFC West": null
+    },
+    "division_order": {
+      "AFC East": null,
+      "AFC North": null,
+      "AFC South": null,
+      "AFC West": null,
+      "NFC East": null,
+      "NFC North": null,
+      "NFC South": null,
+      "NFC West": null
+    },
+    "playoff_teams": {
+      "AFC": [],
+      "NFC": []
+    }
+  },
+  "computed_at": "2026-09-09T23:02:46+00:00",
+  "standings_fetched_at": "2026-09-09T23:02:46+00:00"
+}
