@@ -69,6 +69,24 @@
   .dpts { display: inline-block; min-width: 2.4vh; margin-left: .5vw; padding: .15vh .4vw; border-radius: .6vh; font-size: 1.7vh; font-weight: 700; text-align: center; color: var(--ink); background: var(--grid); vertical-align: middle; }
   .dpts.zero { color: var(--muted); }
 
+  /* pestañas de vista */
+  .viewtabs { display: flex; gap: .5vw; margin-left: 1.5vw; }
+  .viewtabs button { font: inherit; font-size: 1.8vh; font-weight: 600; padding: .45vh 1.1vw; border-radius: .8vh; border: 1px solid var(--grid); background: transparent; color: var(--muted); cursor: pointer; }
+  .viewtabs button.active { color: var(--ink); border-color: var(--ink2); background: var(--surface); }
+  .panel[hidden] { display: none; }
+
+  /* vista de premios y títulos */
+  #awards { grid-column: 1 / -1; grid-row: 3; }
+  .aw-split { display: grid; grid-template-columns: 1fr 1.3fr; gap: 1.6vw; flex: 1; min-height: 0; }
+  .aw-split > div { display: flex; flex-direction: column; min-height: 0; }
+  .aw-split h3 { margin: 0 0 .6vh; font-size: 1.8vh; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; font-weight: 600; }
+  .aw-split h3 span { text-transform: none; letter-spacing: 0; font-weight: 500; }
+  #awards td.tname { color: var(--ink2); }
+  #awards td.pts { color: var(--muted); font-size: 1.7vh; width: 3vw; }
+  #awards .pending { color: var(--muted); }
+  #awards .name { font-size: 2vh; }
+  #awards .name.miss { color: var(--muted); }
+
   #chart { grid-area: chart; height: 24vh; min-height: 180px; }
   #chart .wrap { flex: 1; position: relative; min-height: 0; }
   #chart svg { width: 100%; height: 100%; display: block; overflow: visible; }
@@ -84,11 +102,16 @@
 <div id="app">
   <header>
     <h1>NFL Pool <span id="season"></span></h1>
+    <span class="viewtabs" id="viewtabs">
+      <button type="button" class="active" data-view="temporada">Temporada</button>
+      <button type="button" data-view="premios">Premios y títulos</button>
+    </span>
     <span class="meta" id="meta">cargando…</span>
   </header>
   <div class="cards" id="cards"></div>
   <section class="panel" id="divs"><h2>Divisiones</h2><div class="empty">—</div></section>
   <section class="panel" id="playoffs"><h2>Playoffs · 2 pts por clasificado</h2><div class="empty">—</div></section>
+  <section class="panel" id="awards" hidden><h2>Premios y títulos</h2><div class="empty">—</div></section>
   <section class="panel" id="chart"><h2 style="display:flex;align-items:center">Evolución <span class="legend" id="legend"></span></h2><div class="wrap"><svg id="svg"></svg><div class="tip" id="tip"></div></div></section>
 </div>
 
@@ -98,6 +121,18 @@ const T = window.NFL_TEAMS || {};
 const DEFAULT_COLORS = ["#9085e9", "#e66767"];
 const HEX = /^#[0-9a-f]{6}$/i;
 const CATS = [["divisions","Div"],["playoffs","Playoffs"],["conf_champions","Conf"],["sb_winner","SB"],["awards","Premios"]];
+// Mantener en sincronía con AWARDS en scripts/score.py y docs/picks.html.
+const AWARDS = [
+  ["MVP", 3, "Jugador más valioso"],
+  ["OPOY", 2, "Jugador ofensivo del año"],
+  ["DPOY", 2, "Jugador defensivo del año"],
+  ["OROY", 2, "Novato ofensivo del año"],
+  ["DROY", 2, "Novato defensivo del año"],
+  ["CPOY", 2, "Regreso del año"],
+  ["COY", 2, "Entrenador del año"],
+  ["ACOY", 2, "Asistente del año"],
+  ["SB_MVP", 2, "MVP del Super Bowl"],
+];
 const bust = url => `${url}?v=${Date.now()}`;   // Pages cachea: cache-busting obligatorio
 const logo = abbr => {
   const full = (T[abbr] || {}).logo || "";
@@ -205,8 +240,47 @@ function main(scores, history) {
   document.getElementById("playoffs").innerHTML = `<h2>Playoffs <span class="sub">· 2 pts por clasificado, el seed del pick no importa</span></h2>
     <div class="po">${poTable("AFC")}${poTable("NFC")}</div>`;
 
+  // ---- premios y títulos (se llenan a mano en results.json)
+  const titles = [
+    { label: "Campeón AFC", pts: 4, get: p => p.details.conf_champions.AFC },
+    { label: "Campeón NFC", pts: 4, get: p => p.details.conf_champions.NFC },
+    { label: "Super Bowl", pts: 5, get: p => p.details.sb_winner },
+  ];
+  const titlesTable = `<table><thead><tr><th>Título</th><th>Pts</th><th>Resultado</th>${heads}</tr></thead><tbody>
+    ${titles.map(t => {
+      const actual = (t.get(players[0]) || {}).actual || null;
+      return `<tr><td class="tname">${t.label}</td><td class="pts">${t.pts}</td>
+        <td>${actual ? chip(actual, "") : `<span class="pending">por definir</span>`}</td>
+        ${players.map(p => {
+          const d = t.get(p) || {};
+          if (!d.pick) return `<td class="na">—</td>`;
+          return `<td>${chip(d.pick, actual ? (d.hit ? "hit" : "miss") : "")}</td>`;
+        }).join("")}</tr>`;
+    }).join("")}
+    </tbody></table>`;
+  const awardsTable = `<table><thead><tr><th>Premio</th><th>Pts</th><th>Resultado</th>${heads}</tr></thead><tbody>
+    ${AWARDS.map(([key, pts, desc]) => {
+      const actual = ((players[0].details.awards || {})[key] || {}).actual || null;
+      return `<tr><td class="tname">${key} <span class="pts">${desc}</span></td><td class="pts">${pts}</td>
+        <td class="name">${actual || `<span class="pending">por definir</span>`}</td>
+        ${players.map(p => {
+          const d = (p.details.awards || {})[key] || {};
+          if (!d.pick) return `<td class="na">—</td>`;
+          const state = actual ? (d.hit ? "hit" : "miss") : "";
+          const mark = actual ? (d.hit ? "✓ " : "✗ ") : "";
+          return `<td><span class="name ${state}"><b style="color:${d.hit ? "var(--up)" : "var(--down)"}">${mark}</b>${d.pick}</span></td>`;
+        }).join("")}</tr>`;
+    }).join("")}
+    </tbody></table>`;
+  document.getElementById("awards").innerHTML = `<h2>Premios y títulos <span class="sub">· se cargan a mano en results.json cuando se anuncian</span></h2>
+    <div class="aw-split">
+      <div><h3>Títulos <span>· enero</span></h3>${titlesTable}</div>
+      <div><h3>Premios <span>· febrero, comparación por nombre</span></h3>${awardsTable}</div>
+    </div>`;
+
   // ---- gráfico
   document.getElementById("legend").innerHTML = players.map(p => `<span style="--c:${p.color}"><i></i>${p.display_name}</span>`).join("");
+  window.__redraw = () => drawChart(players, snaps, scores.max_points);
   drawChart(players, snaps, scores.max_points);
 }
 
@@ -277,9 +351,27 @@ function drawChart(players, snaps, max) {
   hit.addEventListener("mouseleave", () => { cross.setAttribute("visibility", "hidden"); tip.style.display = "none"; });
 }
 
+// pestañas: "temporada" (divisiones + playoffs) o "premios"
+const VIEW_KEY = "nfl-pool-view";
+function setView(v) {
+  document.querySelectorAll("#viewtabs button").forEach(b => b.classList.toggle("active", b.dataset.view === v));
+  document.getElementById("divs").hidden = v !== "temporada";
+  document.getElementById("playoffs").hidden = v !== "temporada";
+  document.getElementById("awards").hidden = v !== "premios";
+  try { localStorage.setItem(VIEW_KEY, v); } catch (e) {}
+  if (window.__redraw) window.__redraw();
+}
+document.querySelectorAll("#viewtabs button").forEach(b => b.addEventListener("click", () => setView(b.dataset.view)));
+document.addEventListener("keydown", e => {
+  if (e.key === "ArrowLeft") setView("temporada");
+  if (e.key === "ArrowRight") setView("premios");
+});
+
 (async () => {
   const [scores, history] = await Promise.all([loadJson("data/scores.json", null), loadJson("data/history.json", [])]);
   main(scores, history);
+  let saved; try { saved = localStorage.getItem(VIEW_KEY); } catch (e) {}
+  if (saved === "premios") setView("premios");
   let t; window.addEventListener("resize", () => { clearTimeout(t); t = setTimeout(() => location.reload(), 200); });
 })();
 </script>
