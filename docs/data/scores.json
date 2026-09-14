@@ -6,10 +6,10 @@
     "alfredo": {
       "display_name": "Alfredo",
       "color": "#4900a3",
-      "total": 0,
+      "total": 26,
       "breakdown": {
-        "divisions": 0,
-        "playoffs": 0,
+        "divisions": 14,
+        "playoffs": 12,
         "conf_champions": 0,
         "sb_winner": 0,
         "awards": 0
@@ -23,14 +23,19 @@
               "NYJ",
               "MIA"
             ],
-            "actual": null,
+            "actual": [
+              "BUF",
+              "NYJ",
+              "MIA",
+              "NE"
+            ],
             "hits": [
-              false,
+              true,
               false,
               false,
               false
             ],
-            "points": 0
+            "points": 3
           },
           "AFC North": {
             "pick": [
@@ -39,14 +44,19 @@
               "PIT",
               "CLE"
             ],
-            "actual": null,
-            "hits": [
-              false,
-              false,
-              false,
-              false
+            "actual": [
+              "BAL",
+              "CIN",
+              "PIT",
+              "CLE"
             ],
-            "points": 0
+            "hits": [
+              true,
+              true,
+              true,
+              true
+            ],
+            "points": 6
           },
           "AFC South": {
             "pick": [
@@ -55,14 +65,19 @@
               "IND",
               "TEN"
             ],
-            "actual": null,
+            "actual": [
+              "JAX",
+              "HOU",
+              "IND",
+              "TEN"
+            ],
             "hits": [
               false,
               false,
-              false,
-              false
+              true,
+              true
             ],
-            "points": 0
+            "points": 2
           },
           "AFC West": {
             "pick": [
@@ -87,7 +102,12 @@
               "DAL",
               "WSH"
             ],
-            "actual": null,
+            "actual": [
+              "NYG",
+              "PHI",
+              "WSH",
+              "DAL"
+            ],
             "hits": [
               false,
               false,
@@ -103,14 +123,19 @@
               "DET",
               "MIN"
             ],
-            "actual": null,
+            "actual": [
+              "MIN",
+              "CHI",
+              "DET",
+              "GB"
+            ],
             "hits": [
               false,
               false,
-              false,
+              true,
               false
             ],
-            "points": 0
+            "points": 1
           },
           "NFC South": {
             "pick": [
@@ -119,14 +144,19 @@
               "TB",
               "ATL"
             ],
-            "actual": null,
+            "actual": [
+              "CAR",
+              "NO",
+              "TB",
+              "ATL"
+            ],
             "hits": [
               false,
               false,
-              false,
-              false
+              true,
+              true
             ],
-            "points": 0
+            "points": 2
           },
           "NFC West": {
             "pick": [
@@ -135,7 +165,12 @@
               "SF",
               "ARI"
             ],
-            "actual": null,
+            "actual": [
+              "SF",
+              "ARI",
+              "SEA",
+              "LAR"
+            ],
             "hits": [
               false,
               false,
@@ -156,8 +191,20 @@
               "CIN",
               "LAC"
             ],
-            "actual": [],
-            "hits": []
+            "actual": [
+              "BAL",
+              "BUF",
+              "JAX",
+              "LV",
+              "NYJ",
+              "CIN",
+              "PIT"
+            ],
+            "hits": [
+              "BAL",
+              "BUF",
+              "CIN"
+            ]
           },
           "NFC": {
             "pick": [
@@ -169,8 +216,20 @@
               "GB",
               "NYG"
             ],
-            "actual": [],
-            "hits": []
+            "actual": [
+              "MIN",
+              "NYG",
+              "SF",
+              "CAR",
+              "CHI",
+              "DET",
+              "PHI"
+            ],
+            "hits": [
+              "CHI",
+              "PHI",
+              "NYG"
+            ]
           }
         },
         "conf_champions": {
@@ -251,10 +310,10 @@
     "felipe": {
       "display_name": "Felipe",
       "color": "#e30202",
-      "total": 0,
+      "total": 23,
       "breakdown": {
-        "divisions": 0,
-        "playoffs": 0,
+        "divisions": 11,
+        "playoffs": 12,
         "conf_champions": 0,
         "sb_winner": 0,
         "awards": 0
@@ -268,14 +327,19 @@
               "MIA",
               "NYJ"
             ],
-            "actual": null,
+            "actual": [
+              "BUF",
+              "NYJ",
+              "MIA",
+              "NE"
+            ],
             "hits": [
+              true,
               false,
-              false,
-              false,
+              true,
               false
             ],
-            "points": 0
+            "points": 4
           },
           "AFC North": {
             "pick": [
@@ -284,14 +348,19 @@
               "PIT",
               "CLE"
             ],
-            "actual": null,
-            "hits": [
-              false,
-              false,
-              false,
-              false
+            "actual": [
+              "BAL",
+              "CIN",
+              "PIT",
+              "CLE"
             ],
-            "points": 0
+            "hits": [
+              true,
+              true,
+              true,
+              true
+            ],
+            "points": 6
           },
           "AFC South": {
             "pick": [
@@ -300,7 +369,12 @@
               "TEN",
               "IND"
             ],
-            "actual": null,
+            "actual": [
+              "JAX",
+              "HOU",
+              "IND",
+              "TEN"
+            ],
             "hits": [
               false,
               false,
@@ -332,7 +406,12 @@
               "PHI",
               "WSH"
             ],
-            "actual": null,
+            "actual": [
+              "NYG",
+              "PHI",
+              "WSH",
+              "DAL"
+            ],
             "hits": [
               false,
               false,
@@ -348,7 +427,12 @@
               "GB",
               "MIN"
             ],
-            "actual": null,
+            "actual": [
+              "MIN",
+              "CHI",
+              "DET",
+              "GB"
+            ],
             "hits": [
               false,
               false,
@@ -364,14 +448,19 @@
               "NO",
               "ATL"
             ],
-            "actual": null,
+            "actual": [
+              "CAR",
+              "NO",
+              "TB",
+              "ATL"
+            ],
             "hits": [
               false,
               false,
               false,
-              false
+              true
             ],
-            "points": 0
+            "points": 1
           },
           "NFC West": {
             "pick": [
@@ -380,7 +469,12 @@
               "SF",
               "ARI"
             ],
-            "actual": null,
+            "actual": [
+              "SF",
+              "ARI",
+              "SEA",
+              "LAR"
+            ],
             "hits": [
               false,
               false,
@@ -401,8 +495,20 @@
               "CIN",
               "KC"
             ],
-            "actual": [],
-            "hits": []
+            "actual": [
+              "BAL",
+              "BUF",
+              "JAX",
+              "LV",
+              "NYJ",
+              "CIN",
+              "PIT"
+            ],
+            "hits": [
+              "BUF",
+              "BAL",
+              "CIN"
+            ]
           },
           "NFC": {
             "pick": [
@@ -414,8 +520,20 @@
               "NYG",
               "DET"
             ],
-            "actual": [],
-            "hits": []
+            "actual": [
+              "MIN",
+              "NYG",
+              "SF",
+              "CAR",
+              "CHI",
+              "DET",
+              "PHI"
+            ],
+            "hits": [
+              "CHI",
+              "NYG",
+              "DET"
+            ]
           }
         },
         "conf_champions": {
@@ -496,30 +614,81 @@
   },
   "current": {
     "division_leaders": {
-      "AFC East": null,
-      "AFC North": null,
-      "AFC South": null,
+      "AFC East": "BUF",
+      "AFC North": "BAL",
+      "AFC South": "JAX",
       "AFC West": null,
-      "NFC East": null,
-      "NFC North": null,
-      "NFC South": null,
-      "NFC West": null
+      "NFC East": "NYG",
+      "NFC North": "MIN",
+      "NFC South": "CAR",
+      "NFC West": "SF"
     },
     "division_order": {
-      "AFC East": null,
-      "AFC North": null,
-      "AFC South": null,
+      "AFC East": [
+        "BUF",
+        "NYJ",
+        "MIA",
+        "NE"
+      ],
+      "AFC North": [
+        "BAL",
+        "CIN",
+        "PIT",
+        "CLE"
+      ],
+      "AFC South": [
+        "JAX",
+        "HOU",
+        "IND",
+        "TEN"
+      ],
       "AFC West": null,
-      "NFC East": null,
-      "NFC North": null,
-      "NFC South": null,
-      "NFC West": null
+      "NFC East": [
+        "NYG",
+        "PHI",
+        "WSH",
+        "DAL"
+      ],
+      "NFC North": [
+        "MIN",
+        "CHI",
+        "DET",
+        "GB"
+      ],
+      "NFC South": [
+        "CAR",
+        "NO",
+        "TB",
+        "ATL"
+      ],
+      "NFC West": [
+        "SF",
+        "ARI",
+        "SEA",
+        "LAR"
+      ]
     },
     "playoff_teams": {
-      "AFC": [],
-      "NFC": []
+      "AFC": [
+        "BAL",
+        "BUF",
+        "JAX",
+        "LV",
+        "NYJ",
+        "CIN",
+        "PIT"
+      ],
+      "NFC": [
+        "MIN",
+        "NYG",
+        "SF",
+        "CAR",
+        "CHI",
+        "DET",
+        "PHI"
+      ]
     }
   },
-  "computed_at": "2026-09-09T23:02:46+00:00",
-  "standings_fetched_at": "2026-09-09T23:02:46+00:00"
+  "computed_at": "2026-09-14T04:55:42+00:00",
+  "standings_fetched_at": "2026-09-14T04:55:42+00:00"
 }
