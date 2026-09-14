@@ -213,6 +213,13 @@ def score_all(
     }
 
 
+def week_key(snapshot: dict[str, Any]) -> str:
+    """Clave para agrupar el historial: semana NFL si existe, si no el día UTC
+    (pretemporada y playoffs no traen semana)."""
+    week = snapshot.get("week")
+    return f"w{week}" if week else f"d{(snapshot.get('computed_at') or '')[:10]}"
+
+
 # ---------------------------------------------------------------- I/O (workflow)
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -240,17 +247,19 @@ def main() -> int:
         json.dumps(scores, indent=2, ensure_ascii=False), encoding="utf-8"
     )
 
-    # history.json: un snapshot por corrida, para el gráfico y el delta semanal.
-    history = _load(DATA / "history.json", [])
-    history.append(
-        {
-            "computed_at": scores["computed_at"],
-            "week": scores.get("week"),
-            "totals": {pid: p["total"] for pid, p in scores["players"].items()},
-            "breakdown": {pid: p["breakdown"] for pid, p in scores["players"].items()},
-            "current": scores["current"],
-        }
-    )
+    # history.json: un snapshot por semana NFL, para el gráfico y el delta semanal.
+    # Una corrida manual a mitad de semana reemplaza el snapshot de esa semana en
+    # vez de agregar otro, así el delta del martes sigue siendo contra la semana
+    # anterior.
+    entry = {
+        "computed_at": scores["computed_at"],
+        "week": scores.get("week"),
+        "totals": {pid: p["total"] for pid, p in scores["players"].items()},
+        "breakdown": {pid: p["breakdown"] for pid, p in scores["players"].items()},
+        "current": scores["current"],
+    }
+    key = week_key(entry)
+    history = [h for h in _load(DATA / "history.json", []) if week_key(h) != key] + [entry]
     (DATA / "history.json").write_text(
         json.dumps(history, indent=2, ensure_ascii=False), encoding="utf-8"
     )

@@ -87,6 +87,56 @@ def test_breakdown_includes_results_when_scored(picks_2025, standings_2025, resu
     assert "<i>div 12 (1 campeón · 9 lugares) · playoffs 18 · premios 2</i>" in msg
 
 
+def test_week_one_delta_is_against_season_start(scores_2025):
+    s = {**scores_2025, "week": 1}
+    history = [{"computed_at": "2026-09-09T23:00:00+00:00", "week": 1,
+                "totals": {"alfredo": 0, "oraculo": 0}, "current": s["current"]}]
+    msg = build_message(s, history, None)
+    assert "<b>Oráculo</b>: <b>76</b> (+76)" in msg
+    assert "<b>Alfredo</b>: <b>30</b> (+30)" in msg
+    assert "Cambios de líder" not in msg
+
+
+def test_delta_is_against_previous_week_not_same_week(scores_2025):
+    s = {**scores_2025, "week": 3}
+    history = [
+        {"computed_at": "2026-09-22T12:00:00+00:00", "week": 2, "totals": {"alfredo": 20, "oraculo": 50}},
+        # corrida manual el lunes de la semana 3: misma semana, no es "la anterior"
+        {"computed_at": "2026-09-28T03:00:00+00:00", "week": 3, "totals": {"alfredo": 29, "oraculo": 75}},
+    ]
+    msg = build_message(s, history, None)
+    assert "<b>Oráculo</b>: <b>76</b> (+26)" in msg
+    assert "<b>Alfredo</b>: <b>30</b> (+10)" in msg
+
+
+def test_send_flag(tmp_path, monkeypatch, scores_2025, capsys):
+    import notify
+
+    def no_network(*a, **k):
+        raise RuntimeError("sin red en tests")
+
+    sent = []
+    monkeypatch.setattr(notify, "DATA", tmp_path)
+    monkeypatch.setattr(notify.requests, "get", no_network)
+    monkeypatch.setattr(notify, "send", lambda token, chat, text: sent.append(chat))
+    (tmp_path / "scores.json").write_text(json.dumps(scores_2025), encoding="utf-8")
+    monkeypatch.setenv("TG_TOKEN", "x")
+    monkeypatch.setenv("TG_CHAT", "-100")
+
+    monkeypatch.setenv("SEND", "false")
+    assert notify.main() == 0
+    assert sent == []
+    assert "no se envía" in capsys.readouterr().out
+
+    monkeypatch.setenv("SEND", "true")
+    assert notify.main() == 0
+    assert sent == ["-100"]
+
+    monkeypatch.delenv("SEND")  # sin variable: envía (comportamiento del cron)
+    assert notify.main() == 0
+    assert sent == ["-100", "-100"]
+
+
 def test_message_no_games(scores_2025):
     msg = build_message(scores_2025, [], None)
     assert "Resultados" not in msg

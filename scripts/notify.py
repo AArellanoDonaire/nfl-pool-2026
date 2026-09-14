@@ -10,9 +10,9 @@ Env:
   TG_TOKEN   token del bot (BotFather)
   TG_CHAT    chat id (número; negativo si es grupo)
   POOL_URL   opcional; si no, se arma desde GITHUB_REPOSITORY
+  SEND       "false" para no enviar (corridas manuales); por defecto envía
 
-Sin TG_TOKEN/TG_CHAT imprime el mensaje y termina en 0 (para probar local y
-para que el workflow no falle antes de configurar los secrets).
+Sin TG_TOKEN/TG_CHAT, o con SEND=false, imprime el mensaje y termina en 0.
 """
 
 from __future__ import annotations
@@ -24,6 +24,8 @@ from pathlib import Path
 from typing import Any
 
 import requests
+
+from score import week_key
 
 ROOT = Path(__file__).resolve().parent.parent
 DATA = ROOT / "docs" / "data"
@@ -68,9 +70,20 @@ def parse_games(scoreboard: dict[str, Any]) -> dict[str, Any]:
 # ---------------------------------------------------------------- mensaje
 
 
-def _prev_snapshot(history: list[dict], current_day: str) -> dict | None:
-    prev = [h for h in history if (h.get("computed_at") or "")[:10] < current_day]
-    return prev[-1] if prev else None
+def _prev_snapshot(history: list[dict], scores: dict[str, Any]) -> dict | None:
+    """Último snapshot de una semana anterior a la actual. En la semana 1 se
+    compara contra el inicio de la temporada, con todos en 0."""
+    cur_key = week_key(scores)
+    cur_at = scores.get("computed_at") or ""
+    prev = [
+        h for h in history
+        if week_key(h) != cur_key and (h.get("computed_at") or "") < cur_at
+    ]
+    if prev:
+        return max(prev, key=lambda h: h.get("computed_at") or "")
+    if scores.get("week") == 1:
+        return {"totals": {pid: 0 for pid in scores["players"]}}
+    return None
 
 
 def _fmt_delta(d: int | None) -> str:
@@ -101,8 +114,7 @@ def build_message(
     url: str | None = None,
 ) -> str:
     """Texto del mensaje (HTML de Telegram). Función pura."""
-    day = (scores.get("computed_at") or "")[:10]
-    prev = _prev_snapshot(history, day)
+    prev = _prev_snapshot(history, scores)
     week = (games or {}).get("week")
     title = f"\U0001F3C8 <b>NFL Pool {scores.get('season', '')}</b>"
     if week:
@@ -217,8 +229,13 @@ def main() -> int:
     text = build_message(scores, history, games, pool_url())
 
     token, chat = os.environ.get("TG_TOKEN"), os.environ.get("TG_CHAT")
-    if not token or not chat:
-        print("TG_TOKEN/TG_CHAT no configurados; mensaje que se habría enviado:\n")
+    send_enabled = os.environ.get("SEND", "true").strip().lower() != "false"
+    if not token or not chat or not send_enabled:
+        reason = (
+            "TG_TOKEN/TG_CHAT no configurados" if not token or not chat
+            else "corrida manual sin aviso: no se envía"
+        )
+        print(f"{reason}; mensaje que se habría enviado:\n")
         print(text)
         return 0
     send(token, chat, text)

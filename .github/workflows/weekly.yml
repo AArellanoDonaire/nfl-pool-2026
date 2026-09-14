@@ -3,7 +3,12 @@ name: weekly-update
 on:
   schedule:
     - cron: "0 12 * * 2"   # martes 12:00 UTC = 09:00 Chile (UTC-3 toda la temporada)
-  workflow_dispatch:        # botón manual, indispensable para probar
+  workflow_dispatch:        # botón manual; por defecto no avisa por Telegram
+    inputs:
+      notify:
+        description: "Mandar el resumen a Telegram"
+        type: boolean
+        default: false
 
 permissions:
   contents: write           # necesario para el commit
@@ -48,4 +53,6 @@ jobs:
         env:
           TG_TOKEN: ${{ secrets.TG_TOKEN }}
           TG_CHAT: ${{ secrets.TG_CHAT }}
-        run: python scripts/notify.py   # sin secrets solo imprime el mensaje
+          # el cron siempre avisa; a mano solo si se marcó la casilla
+          SEND: ${{ github.event_name == 'schedule' || inputs.notify }}
+        run: python scripts/notify.py   # sin secrets o con SEND=false solo imprime

@@ -149,22 +149,32 @@ def test_main_writes_scores_and_history(tmp_path, monkeypatch, picks_2025, stand
 
     monkeypatch.setattr(score, "DATA", tmp_path)
     (tmp_path / "picks.json").write_text(json.dumps(picks_2025), encoding="utf-8")
-    (tmp_path / "standings.json").write_text(json.dumps(standings_2025), encoding="utf-8")
 
-    assert score.main() == 0
+    def run(week):
+        st = {**standings_2025, "week": week}
+        (tmp_path / "standings.json").write_text(json.dumps(st), encoding="utf-8")
+        assert score.main() == 0
+        return json.loads((tmp_path / "history.json").read_text(encoding="utf-8"))
+
+    history = run(1)
     scores = json.loads((tmp_path / "scores.json").read_text(encoding="utf-8"))
     assert scores["players"]["oraculo"]["total"] == 76
     assert "computed_at" in scores
-
-    history = json.loads((tmp_path / "history.json").read_text(encoding="utf-8"))
-    assert len(history) == 1
+    assert [h["week"] for h in history] == [1]
     assert history[0]["totals"] == {"alfredo": 30, "oraculo": 76}
-    assert "week" in history[0]
 
-    # Segunda corrida: agrega snapshot, no pisa.
-    assert score.main() == 0
-    history = json.loads((tmp_path / "history.json").read_text(encoding="utf-8"))
-    assert len(history) == 2
+    # Otra corrida en la misma semana (ej. manual el lunes): reemplaza, no agrega.
+    assert [h["week"] for h in run(1)] == [1]
+    # Semana nueva: agrega. Y otra vez la misma: sigue habiendo uno por semana.
+    assert [h["week"] for h in run(2)] == [1, 2]
+    assert [h["week"] for h in run(2)] == [1, 2]
+
+
+def test_week_key():
+    from score import week_key
+    assert week_key({"week": 3, "computed_at": "2026-09-29T12:00:00+00:00"}) == "w3"
+    # sin semana (pretemporada, playoffs): agrupa por día
+    assert week_key({"week": None, "computed_at": "2027-01-12T12:00:00+00:00"}) == "d2027-01-12"
 
 
 def test_main_fails_without_inputs(tmp_path, monkeypatch):

@@ -149,13 +149,16 @@ async function loadJson(path, fallback) {
 }
 
 const fmtDate = iso => iso ? new Date(iso).toLocaleDateString("es-CL", { day: "numeric", month: "short" }) : "";
-const snapLabel = h => h.week ? `S${h.week}` : fmtDate(h.computed_at);
+const snapLabel = h => h.label || (h.week ? `S${h.week}` : fmtDate(h.computed_at));
 const day = iso => (iso || "").slice(0, 10);
 
-// Un snapshot por día (UTC); si el workflow corrió dos veces el mismo día, vale el último.
-function byDay(history) {
+// Clave del historial: semana NFL, o el día si no hay semana (misma regla que
+// week_key en scripts/score.py). Un snapshot por clave: si hay varios, vale el último.
+const weekKey = h => h.week ? `w${h.week}` : `d${day(h.computed_at)}`;
+function byWeek(history) {
   const m = new Map();
-  for (const h of history) m.set(day(h.computed_at), h);
+  const sorted = [...history].sort((a, b) => (a.computed_at || "").localeCompare(b.computed_at || ""));
+  for (const h of sorted) m.set(weekKey(h), h);
   return [...m.values()];
 }
 
@@ -178,9 +181,12 @@ function main(scores, history) {
     const color = HEX.test(p.color || "") ? p.color : DEFAULT_COLORS[i % DEFAULT_COLORS.length];
     return { id, i, ...p, color };
   });
-  const snaps = byDay(history || []);
-  const today = day(scores.computed_at);
-  const prev = [...snaps].reverse().find(h => day(h.computed_at) < today) || null;
+  const snaps = byWeek(history || []);
+  // Delta contra la semana anterior; en la semana 1, contra el inicio (todos en 0).
+  const curKey = weekKey(scores);
+  const prevs = snaps.filter(h => weekKey(h) !== curKey && (h.computed_at || "") < (scores.computed_at || ""));
+  const prev = prevs.length ? prevs[prevs.length - 1]
+    : scores.week === 1 ? { label: "inicio", totals: Object.fromEntries(ids.map(id => [id, 0])) } : null;
 
   document.getElementById("season").textContent = (scores.season || "") + (scores.week ? ` · Semana ${scores.week}` : "");
   document.getElementById("meta").textContent =

@@ -46,9 +46,13 @@ Campeones, Super Bowl y premios salen de `docs/data/results.json` (manual).
    puede llenar su pestaña por su cuenta y usar *Descargar solo este jugador*;
    el otro lo carga con *Importar JSON*. Con los dos completos, *Generar JSON*,
    descargar y commitear como `docs/data/picks.json`. Antes del kickoff.
-4. **Probar el workflow**: Actions → *weekly-update* → *Run workflow*. Debería
-   commitear `docs/data/standings.json` y `scores.json`. Si `picks.json` no
-   existe todavía, solo commitea standings y avisa.
+4. **Correr a mano**: Actions → *weekly-update* → *Run workflow*, o
+   `gh workflow run weekly-update`. Por defecto **no** manda Telegram: el mensaje
+   queda en el log. Para enviarlo, marca *Mandar el resumen a Telegram* o usa
+   `gh workflow run weekly-update -f notify=true`. El cron del martes siempre
+   avisa. Se puede correr cualquier día: el historial guarda un punto por semana
+   NFL y una corrida a mitad de semana reemplaza el de esa semana, así el delta
+   del martes sigue comparando contra la semana anterior.
 5. **Resultados manuales** (enero/febrero): crear `docs/data/results.json`:
 
    ```json
