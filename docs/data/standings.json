@@ -23,7 +23,7 @@
       "record": "1-0",
       "win_pct": 1.0,
       "point_diff": 13,
-      "seed": 5,
+      "seed": 6,
       "clincher": null
     },
     "MIA": {
@@ -35,7 +35,7 @@
       "record": "0-1",
       "win_pct": 0.0,
       "point_diff": -14,
-      "seed": 12,
+      "seed": 11,
       "clincher": null
     },
     "NE": {
@@ -71,7 +71,7 @@
       "record": "1-0",
       "win_pct": 1.0,
       "point_diff": 6,
-      "seed": 6,
+      "seed": 7,
       "clincher": null
     },
     "PIT": {
@@ -83,7 +83,7 @@
       "record": "1-0",
       "win_pct": 1.0,
       "point_diff": 7,
-      "seed": 7,
+      "seed": 8,
       "clincher": null
     },
     "CLE": {
@@ -119,7 +119,7 @@
       "record": "0-1",
       "win_pct": 0.0,
       "point_diff": -5,
-      "seed": 10,
+      "seed": 9,
       "clincher": null
     },
     "IND": {
@@ -131,7 +131,7 @@
       "record": "0-1",
       "win_pct": 0.0,
       "point_diff": -18,
-      "seed": 11,
+      "seed": 10,
       "clincher": null
     },
     "TEN": {
@@ -143,7 +143,19 @@
       "record": "0-1",
       "win_pct": 0.0,
       "point_diff": -13,
-      "seed": 13,
+      "seed": 12,
+      "clincher": null
+    },
+    "KC": {
+      "conference": "AFC",
+      "division": "AFC West",
+      "wins": 1,
+      "losses": 0,
+      "ties": 0,
+      "record": "1-0",
+      "win_pct": 1.0,
+      "point_diff": 21,
+      "seed": 4,
       "clincher": null
     },
     "LV": {
@@ -155,31 +167,19 @@
       "record": "1-0",
       "win_pct": 1.0,
       "point_diff": 14,
-      "seed": 4,
+      "seed": 5,
       "clincher": null
     },
     "DEN": {
       "conference": "AFC",
       "division": "AFC West",
       "wins": 0,
-      "losses": 0,
+      "losses": 1,
       "ties": 0,
-      "record": "0-0",
+      "record": "0-1",
       "win_pct": 0.0,
-      "point_diff": 0,
-      "seed": 0,
-      "clincher": null
-    },
-    "KC": {
-      "conference": "AFC",
-      "division": "AFC West",
-      "wins": 0,
-      "losses": 0,
-      "ties": 0,
-      "record": "0-0",
-      "win_pct": 0.0,
-      "point_diff": 0,
-      "seed": 0,
+      "point_diff": -21,
+      "seed": 13,
       "clincher": null
     },
     "LAC": {
@@ -387,6 +387,6 @@
       "clincher": null
     }
   },
-  "fetched_at": "2026-09-14T04:57:52+00:00",
+  "fetched_at": "2026-09-15T15:53:05+00:00",
   "week": 1
 }

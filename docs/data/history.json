@@ -1,10 +1,10 @@
 [
   {
-    "computed_at": "2026-09-14T04:57:52+00:00",
+    "computed_at": "2026-09-15T15:53:05+00:00",
     "week": 1,
     "totals": {
       "alfredo": 26,
-      "felipe": 23
+      "felipe": 25
     },
     "breakdown": {
       "alfredo": {
@@ -16,7 +16,7 @@
       },
       "felipe": {
         "divisions": 11,
-        "playoffs": 12,
+        "playoffs": 14,
         "conf_champions": 0,
         "sb_winner": 0,
         "awards": 0
@@ -27,7 +27,7 @@
         "AFC East": "BUF",
         "AFC North": "BAL",
         "AFC South": "JAX",
-        "AFC West": null,
+        "AFC West": "KC",
         "NFC East": "NYG",
         "NFC North": "MIN",
         "NFC South": "CAR",
@@ -52,7 +52,12 @@
           "IND",
           "TEN"
         ],
-        "AFC West": null,
+        "AFC West": [
+          "KC",
+          "LV",
+          "DEN",
+          "LAC"
+        ],
         "NFC East": [
           "NYG",
           "PHI",
@@ -83,10 +88,10 @@
           "BAL",
           "BUF",
           "JAX",
+          "KC",
           "LV",
           "NYJ",
-          "CIN",
-          "PIT"
+          "CIN"
         ],
         "NFC": [
           "MIN",

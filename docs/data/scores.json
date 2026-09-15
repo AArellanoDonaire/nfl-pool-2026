@@ -86,7 +86,12 @@
               "KC",
               "LV"
             ],
-            "actual": null,
+            "actual": [
+              "KC",
+              "LV",
+              "DEN",
+              "LAC"
+            ],
             "hits": [
               false,
               false,
@@ -195,10 +200,10 @@
               "BAL",
               "BUF",
               "JAX",
+              "KC",
               "LV",
               "NYJ",
-              "CIN",
-              "PIT"
+              "CIN"
             ],
             "hits": [
               "BAL",
@@ -310,10 +315,10 @@
     "felipe": {
       "display_name": "Felipe",
       "color": "#e30202",
-      "total": 23,
+      "total": 25,
       "breakdown": {
         "divisions": 11,
-        "playoffs": 12,
+        "playoffs": 14,
         "conf_champions": 0,
         "sb_winner": 0,
         "awards": 0
@@ -390,7 +395,12 @@
               "LAC",
               "LV"
             ],
-            "actual": null,
+            "actual": [
+              "KC",
+              "LV",
+              "DEN",
+              "LAC"
+            ],
             "hits": [
               false,
               false,
@@ -499,15 +509,16 @@
               "BAL",
               "BUF",
               "JAX",
+              "KC",
               "LV",
               "NYJ",
-              "CIN",
-              "PIT"
+              "CIN"
             ],
             "hits": [
               "BUF",
               "BAL",
-              "CIN"
+              "CIN",
+              "KC"
             ]
           },
           "NFC": {
@@ -617,7 +628,7 @@
       "AFC East": "BUF",
       "AFC North": "BAL",
       "AFC South": "JAX",
-      "AFC West": null,
+      "AFC West": "KC",
       "NFC East": "NYG",
       "NFC North": "MIN",
       "NFC South": "CAR",
@@ -642,7 +653,12 @@
         "IND",
         "TEN"
       ],
-      "AFC West": null,
+      "AFC West": [
+        "KC",
+        "LV",
+        "DEN",
+        "LAC"
+      ],
       "NFC East": [
         "NYG",
         "PHI",
@@ -673,10 +689,10 @@
         "BAL",
         "BUF",
         "JAX",
+        "KC",
         "LV",
         "NYJ",
-        "CIN",
-        "PIT"
+        "CIN"
       ],
       "NFC": [
         "MIN",
@@ -689,6 +705,6 @@
       ]
     }
   },
-  "computed_at": "2026-09-14T04:57:52+00:00",
-  "standings_fetched_at": "2026-09-14T04:57:52+00:00"
+  "computed_at": "2026-09-15T15:53:05+00:00",
+  "standings_fetched_at": "2026-09-15T15:53:05+00:00"
 }
