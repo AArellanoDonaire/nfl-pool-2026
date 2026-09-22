@@ -104,5 +104,111 @@
         ]
       }
     }
+  },
+  {
+    "computed_at": "2026-09-22T15:55:28+00:00",
+    "week": 2,
+    "totals": {
+      "alfredo": 31,
+      "felipe": 23
+    },
+    "breakdown": {
+      "alfredo": {
+        "divisions": 17,
+        "playoffs": 14,
+        "conf_champions": 0,
+        "sb_winner": 0,
+        "awards": 0
+      },
+      "felipe": {
+        "divisions": 9,
+        "playoffs": 14,
+        "conf_champions": 0,
+        "sb_winner": 0,
+        "awards": 0
+      }
+    },
+    "current": {
+      "division_leaders": {
+        "AFC East": "BUF",
+        "AFC North": "CIN",
+        "AFC South": "JAX",
+        "AFC West": "KC",
+        "NFC East": "PHI",
+        "NFC North": "MIN",
+        "NFC South": "CAR",
+        "NFC West": "SEA"
+      },
+      "division_order": {
+        "AFC East": [
+          "BUF",
+          "NE",
+          "NYJ",
+          "MIA"
+        ],
+        "AFC North": [
+          "CIN",
+          "BAL",
+          "CLE",
+          "PIT"
+        ],
+        "AFC South": [
+          "JAX",
+          "HOU",
+          "IND",
+          "TEN"
+        ],
+        "AFC West": [
+          "KC",
+          "LV",
+          "DEN",
+          "LAC"
+        ],
+        "NFC East": [
+          "PHI",
+          "NYG",
+          "DAL",
+          "WSH"
+        ],
+        "NFC North": [
+          "MIN",
+          "DET",
+          "CHI",
+          "GB"
+        ],
+        "NFC South": [
+          "CAR",
+          "NO",
+          "TB",
+          "ATL"
+        ],
+        "NFC West": [
+          "SEA",
+          "SF",
+          "LAR",
+          "ARI"
+        ]
+      },
+      "playoff_teams": {
+        "AFC": [
+          "KC",
+          "BUF",
+          "CIN",
+          "JAX",
+          "LV",
+          "NE",
+          "BAL"
+        ],
+        "NFC": [
+          "MIN",
+          "SEA",
+          "PHI",
+          "CAR",
+          "SF",
+          "DET",
+          "CHI"
+        ]
+      }
+    }
   }
 ]
