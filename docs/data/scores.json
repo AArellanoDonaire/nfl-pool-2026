@@ -1,15 +1,15 @@
 {
   "season": 2026,
-  "week": 2,
+  "week": 3,
   "max_points": 108,
   "players": {
     "alfredo": {
       "display_name": "Alfredo",
       "color": "#4900a3",
-      "total": 31,
+      "total": 24,
       "breakdown": {
-        "divisions": 17,
-        "playoffs": 14,
+        "divisions": 12,
+        "playoffs": 12,
         "conf_champions": 0,
         "sb_winner": 0,
         "awards": 0
@@ -25,17 +25,17 @@
             ],
             "actual": [
               "BUF",
-              "NE",
               "NYJ",
+              "NE",
               "MIA"
             ],
             "hits": [
               true,
-              true,
-              true,
+              false,
+              false,
               true
             ],
-            "points": 6
+            "points": 4
           },
           "AFC North": {
             "pick": [
@@ -45,10 +45,10 @@
               "CLE"
             ],
             "actual": [
-              "CIN",
+              "PIT",
               "BAL",
               "CLE",
-              "PIT"
+              "CIN"
             ],
             "hits": [
               false,
@@ -67,17 +67,17 @@
             ],
             "actual": [
               "JAX",
-              "HOU",
               "IND",
-              "TEN"
+              "TEN",
+              "HOU"
             ],
             "hits": [
               false,
               false,
-              true,
-              true
+              false,
+              false
             ],
-            "points": 2
+            "points": 0
           },
           "AFC West": {
             "pick": [
@@ -152,16 +152,16 @@
             "actual": [
               "CAR",
               "NO",
-              "TB",
-              "ATL"
+              "ATL",
+              "TB"
             ],
             "hits": [
               false,
               false,
-              true,
-              true
+              false,
+              false
             ],
-            "points": 2
+            "points": 0
           },
           "NFC West": {
             "pick": [
@@ -171,18 +171,18 @@
               "ARI"
             ],
             "actual": [
-              "SEA",
               "SF",
+              "SEA",
               "LAR",
               "ARI"
             ],
             "hits": [
               false,
-              false,
+              true,
               false,
               true
             ],
-            "points": 1
+            "points": 2
           }
         },
         "playoffs": {
@@ -199,17 +199,16 @@
             "actual": [
               "KC",
               "BUF",
-              "CIN",
               "JAX",
+              "PIT",
               "LV",
-              "NE",
-              "BAL"
+              "BAL",
+              "DEN"
             ],
             "hits": [
               "BAL",
-              "BUF",
-              "NE",
-              "CIN"
+              "DEN",
+              "BUF"
             ]
           },
           "NFC": {
@@ -224,12 +223,12 @@
             ],
             "actual": [
               "MIN",
-              "SEA",
+              "SF",
               "PHI",
               "CAR",
-              "SF",
               "DET",
-              "CHI"
+              "CHI",
+              "SEA"
             ],
             "hits": [
               "CHI",
@@ -335,17 +334,17 @@
             ],
             "actual": [
               "BUF",
-              "NE",
               "NYJ",
+              "NE",
               "MIA"
             ],
             "hits": [
               true,
-              true,
+              false,
               false,
               false
             ],
-            "points": 4
+            "points": 3
           },
           "AFC North": {
             "pick": [
@@ -355,10 +354,10 @@
               "CLE"
             ],
             "actual": [
-              "CIN",
+              "PIT",
               "BAL",
               "CLE",
-              "PIT"
+              "CIN"
             ],
             "hits": [
               false,
@@ -377,17 +376,17 @@
             ],
             "actual": [
               "JAX",
-              "HOU",
               "IND",
-              "TEN"
+              "TEN",
+              "HOU"
             ],
             "hits": [
               false,
               false,
-              false,
+              true,
               false
             ],
-            "points": 0
+            "points": 1
           },
           "AFC West": {
             "pick": [
@@ -462,16 +461,16 @@
             "actual": [
               "CAR",
               "NO",
-              "TB",
-              "ATL"
+              "ATL",
+              "TB"
             ],
             "hits": [
               false,
               false,
               false,
-              true
+              false
             ],
-            "points": 1
+            "points": 0
           },
           "NFC West": {
             "pick": [
@@ -481,18 +480,18 @@
               "ARI"
             ],
             "actual": [
-              "SEA",
               "SF",
+              "SEA",
               "LAR",
               "ARI"
             ],
             "hits": [
               false,
-              false,
+              true,
               false,
               true
             ],
-            "points": 1
+            "points": 2
           }
         },
         "playoffs": {
@@ -509,16 +508,16 @@
             "actual": [
               "KC",
               "BUF",
-              "CIN",
               "JAX",
+              "PIT",
               "LV",
-              "NE",
-              "BAL"
+              "BAL",
+              "DEN"
             ],
             "hits": [
               "BUF",
               "BAL",
-              "CIN",
+              "DEN",
               "KC"
             ]
           },
@@ -534,12 +533,12 @@
             ],
             "actual": [
               "MIN",
-              "SEA",
+              "SF",
               "PHI",
               "CAR",
-              "SF",
               "DET",
-              "CHI"
+              "CHI",
+              "SEA"
             ],
             "hits": [
               "CHI",
@@ -627,32 +626,32 @@
   "current": {
     "division_leaders": {
       "AFC East": "BUF",
-      "AFC North": "CIN",
+      "AFC North": "PIT",
       "AFC South": "JAX",
       "AFC West": "KC",
       "NFC East": "PHI",
       "NFC North": "MIN",
       "NFC South": "CAR",
-      "NFC West": "SEA"
+      "NFC West": "SF"
     },
     "division_order": {
       "AFC East": [
         "BUF",
-        "NE",
         "NYJ",
+        "NE",
         "MIA"
       ],
       "AFC North": [
-        "CIN",
+        "PIT",
         "BAL",
         "CLE",
-        "PIT"
+        "CIN"
       ],
       "AFC South": [
         "JAX",
-        "HOU",
         "IND",
-        "TEN"
+        "TEN",
+        "HOU"
       ],
       "AFC West": [
         "KC",
@@ -675,12 +674,12 @@
       "NFC South": [
         "CAR",
         "NO",
-        "TB",
-        "ATL"
+        "ATL",
+        "TB"
       ],
       "NFC West": [
-        "SEA",
         "SF",
+        "SEA",
         "LAR",
         "ARI"
       ]
@@ -689,23 +688,23 @@
       "AFC": [
         "KC",
         "BUF",
-        "CIN",
         "JAX",
+        "PIT",
         "LV",
-        "NE",
-        "BAL"
+        "BAL",
+        "DEN"
       ],
       "NFC": [
         "MIN",
-        "SEA",
+        "SF",
         "PHI",
         "CAR",
-        "SF",
         "DET",
-        "CHI"
+        "CHI",
+        "SEA"
       ]
     }
   },
-  "computed_at": "2026-09-22T15:55:28+00:00",
-  "standings_fetched_at": "2026-09-22T15:55:28+00:00"
+  "computed_at": "2026-09-29T17:13:43+00:00",
+  "standings_fetched_at": "2026-09-29T17:13:43+00:00"
 }
